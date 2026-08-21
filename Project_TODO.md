@@ -16,3 +16,6 @@
 - [x] Add owner-scoped progress analytics, retention and workload metrics, study heatmap data, and preferences.
 - [x] Add final accessibility, security, error-handling, test coverage, and standalone project documentation improvements.
 - [x] Deliver the Standalone Milestone 4 source files, migration, validation commands, and Git commit guide.
+- [x] Add a private, versioned module backup export and validated module restore workflow.
+- [x] Add protected backup/restore API coverage, accessible import/export interface, and update standalone documentation.
+- [x] Deliver the Standalone Milestone 5 source files, validation commands, and Git commit guide.

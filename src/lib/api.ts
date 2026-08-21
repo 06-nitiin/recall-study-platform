@@ -348,3 +348,12 @@ export const savePreferences = (input: {
     method: "PUT",
     body: JSON.stringify(input),
   });
+
+export const exportModuleBackup = (moduleId: number) =>
+  request<unknown>(`/api/modules/${moduleId}/backup`);
+
+export const restoreModuleBackup = (backup: unknown) =>
+  request<{ module: StudyModule }>("/api/modules/restore", {
+    method: "POST",
+    body: JSON.stringify(backup),
+  });

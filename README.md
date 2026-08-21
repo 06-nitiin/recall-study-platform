@@ -41,6 +41,12 @@ Create a module, upload a `.txt` or `.md` material, and run extraction. Once at 
 
 The progress panel displays only records already created by the signed-in user: cards due, retention from review quality, a review heatmap, a consecutive-review streak, and per-module activity. A user can choose daily and preferred-session minute targets; these settings are persisted privately.
 
+## Portable module backup and restore
+
+With a module open, choose **Export module** to download a versioned JSON backup containing that module’s title, description, study guide, flashcards, and quiz questions. The backup deliberately excludes uploaded source files, extracted material text, tutor chat, review history, sessions, preferences, and account information.
+
+Choose **Restore backup** and select a previously exported JSON file to add its contents as a new private module. The file is validated by the API before any data is written. Restoring does not overwrite an existing module, and imported cards begin without an existing review schedule.
+
 ## Validation
 
 Run these commands before committing a milestone:
