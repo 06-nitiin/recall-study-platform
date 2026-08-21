@@ -4,6 +4,7 @@ coverage/
 .env
 .env.local
 data/
+uploads/
 *.log
 .DS_Store
 *.tsbuildinfo

@@ -15,6 +15,13 @@
       "when": 1787311255787,
       "tag": "0001_wooden_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787312804107,
+      "tag": "0002_foamy_abomination",
+      "breakpoints": true
     }
   ]
 }

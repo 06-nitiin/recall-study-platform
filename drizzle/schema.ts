@@ -21,3 +21,19 @@ export const modules = sqliteTable("modules", {
 });
 
 export type StudyModule = typeof modules.$inferSelect;
+
+export const materials = sqliteTable("materials", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  moduleId: integer("module_id").notNull().references(() => modules.id, { onDelete: "cascade" }),
+  originalFilename: text("original_filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  byteSize: integer("byte_size").notNull(),
+  storageKey: text("storage_key").notNull().unique(),
+  extractionStatus: text("extraction_status", { enum: ["uploaded", "ready", "failed"] }).notNull().default("uploaded"),
+  extractionError: text("extraction_error"),
+  extractedText: text("extracted_text"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+export type StudyMaterial = typeof materials.$inferSelect;

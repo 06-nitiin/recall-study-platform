@@ -1,5 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
-import { modules, users } from "../../drizzle/schema";
+import { materials, modules, users } from "../../drizzle/schema";
 import { db } from "./client";
 
 export async function findUserByEmail(email: string) {
@@ -37,4 +37,29 @@ export async function updateModuleForUser(moduleId: number, userId: number, inpu
 
 export async function deleteModuleForUser(moduleId: number, userId: number) {
   return db.delete(modules).where(and(eq(modules.id, moduleId), eq(modules.userId, userId))).run().changes > 0;
+}
+
+export async function listMaterialsForModule(moduleId: number) {
+  return db.select().from(materials).where(eq(materials.moduleId, moduleId)).orderBy(desc(materials.createdAt)).all();
+}
+
+export async function createMaterialForModule(input: { moduleId: number; originalFilename: string; mimeType: string; byteSize: number; storageKey: string }) {
+  const now = new Date();
+  const result = db.insert(materials).values({ ...input, createdAt: now, updatedAt: now }).run();
+  return db.select().from(materials).where(eq(materials.id, Number(result.lastInsertRowid))).get();
+}
+
+export async function getMaterialForUser(materialId: number, userId: number) {
+  return db.select({ material: materials }).from(materials).innerJoin(modules, eq(materials.moduleId, modules.id)).where(and(eq(materials.id, materialId), eq(modules.userId, userId))).get()?.material;
+}
+
+export async function setMaterialExtraction(materialId: number, status: "ready" | "failed", extractedText?: string, extractionError?: string) {
+  return db.update(materials).set({ extractionStatus: status, extractedText: extractedText ?? null, extractionError: extractionError ?? null, updatedAt: new Date() }).where(eq(materials.id, materialId)).run();
+}
+
+export async function deleteMaterialForUser(materialId: number, userId: number) {
+  const material = await getMaterialForUser(materialId, userId);
+  if (!material) return undefined;
+  db.delete(materials).where(eq(materials.id, materialId)).run();
+  return material;
 }
