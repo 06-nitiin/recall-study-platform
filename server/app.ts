@@ -3,11 +3,12 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import { ZodError } from "zod";
 
-import { attachUser } from "./middleware/requireUser";
 import { MaterialError } from "./lib/materials";
+import { attachUser } from "./middleware/requireUser";
 import { authRouter } from "./routes/auth";
 import { materialsRouter } from "./routes/materials";
 import { modulesRouter } from "./routes/modules";
+import { studyRouter } from "./routes/study";
 
 export function createApp() {
   const app = express();
@@ -28,6 +29,7 @@ export function createApp() {
   app.use("/api/auth", authRouter);
   app.use("/api/modules", modulesRouter);
   app.use("/api", materialsRouter);
+  app.use("/api", studyRouter);
 
   app.use(
     (

@@ -30,6 +30,22 @@ export type StudyMaterial = {
   updatedAt: string;
 };
 
+export type Flashcard = {
+  id: number;
+  prompt: string;
+  answer: string;
+  explanation: string | null;
+  moduleId: number;
+};
+
+export type QuizQuestion = {
+  id: number;
+  prompt: string;
+  optionsJson: string;
+  correctOptionId: string;
+  explanation: string | null;
+};
+
 async function request<T>(
   path: string,
   options: RequestInit = {},
@@ -187,3 +203,109 @@ export const deleteMaterial = async (materialId: number) => {
     throw new Error("Could not delete this material.");
   }
 };
+
+export const generateStudyContent = (moduleId: number) =>
+  request<{
+    flashcardCount: number;
+    quizQuestionCount: number;
+  }>(`/api/modules/${moduleId}/generate`, {
+    method: "POST",
+  });
+
+export const getStudyContent = (moduleId: number) =>
+  request<{
+    guide: {
+      summary: string;
+      concepts: Array<{
+        title: string;
+        explanation: string;
+      }>;
+    } | null;
+    flashcards: Flashcard[];
+    quizQuestions: QuizQuestion[];
+  }>(`/api/modules/${moduleId}/study-content`);
+
+export const getDueCards = (moduleId: number) =>
+  request<{
+    cards: Array<{
+      card: Flashcard;
+      state: {
+        repetitions: number;
+        intervalDays: number;
+        easeFactor: number;
+      } | null;
+    }>;
+  }>(`/api/modules/${moduleId}/due-cards`);
+
+export const recordCardReview = (
+  flashcardId: number,
+  input: {
+    moduleId: number;
+    rating: "again" | "hard" | "good" | "easy";
+    confidence: number;
+    state?: {
+      repetitions: number;
+      intervalDays: number;
+      easeFactor: number;
+    };
+  },
+) =>
+  request<{
+    intervalDays: number;
+    dueAt: string;
+  }>(`/api/flashcards/${flashcardId}/review`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+export const startQuiz = (moduleId: number) =>
+  request<{
+    session: {
+      id: number;
+    };
+  }>(`/api/modules/${moduleId}/quiz-sessions`, {
+    method: "POST",
+  });
+
+export const answerQuiz = (
+  sessionId: number,
+  input: {
+    questionId: number;
+    selectedOptionId: string;
+    confidence: number;
+  },
+) =>
+  request<{
+    isCorrect: boolean;
+    explanation: string | null;
+    correctOptionId: string;
+  }>(`/api/quiz-sessions/${sessionId}/responses`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+export const getTutorMessages = (moduleId: number) =>
+  request<{
+    messages: Array<{
+      id: number;
+      role: "user" | "assistant";
+      content: string;
+      citedMaterialIdsJson: string | null;
+    }>;
+  }>(`/api/modules/${moduleId}/tutor`);
+
+export const sendTutorMessage = (
+  moduleId: number,
+  message: string,
+) =>
+  request<{
+    message: {
+      id: number;
+      role: "assistant";
+      content: string;
+      citedMaterialIdsJson: string | null;
+    };
+  }>(`/api/modules/${moduleId}/tutor`, {
+    method: "POST",
+    body: JSON.stringify({ message }),
+  });

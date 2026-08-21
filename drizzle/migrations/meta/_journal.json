@@ -22,6 +22,13 @@
       "when": 1787312804107,
       "tag": "0002_foamy_abomination",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1787313183086,
+      "tag": "0003_open_tarot",
+      "breakpoints": true
     }
   ]
 }

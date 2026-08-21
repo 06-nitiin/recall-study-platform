@@ -18,6 +18,7 @@ import {
   type StudyModule,
 } from "../lib/api";
 import { MaterialPanel } from "./MaterialPanel";
+import { StudyPanel } from "./StudyPanel";
 
 export function ModuleDashboard({
   user,
@@ -120,8 +121,8 @@ export function ModuleDashboard({
           </h1>
 
           <p className="mt-3 max-w-xl leading-7 text-slate-600">
-            Create a module for each course or subject, then attach private
-            source notes.
+            Create a module for each course or subject, then attach
+            private source notes.
           </p>
         </div>
 
@@ -288,6 +289,7 @@ export function ModuleDashboard({
       {selectedModule && (
         <div className="mx-auto max-w-6xl">
           <MaterialPanel module={selectedModule} />
+          <StudyPanel module={selectedModule} />
         </div>
       )}
     </main>
