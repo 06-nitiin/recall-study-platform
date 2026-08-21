@@ -5,6 +5,13 @@ const environmentSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(8787),
   DATABASE_URL: z.string().default("file:./data/recall.db"),
+  SESSION_SECRET: z.string().min(32),
 });
 
-export const env = environmentSchema.parse(process.env);
+const isProduction = process.env.NODE_ENV === "production";
+const candidateDatabaseUrl = process.env.DATABASE_URL;
+export const env = environmentSchema.parse({
+  ...process.env,
+  DATABASE_URL: candidateDatabaseUrl?.startsWith("file:") ? candidateDatabaseUrl : "file:./data/recall.db",
+  SESSION_SECRET: process.env.SESSION_SECRET ?? (isProduction ? undefined : "local-development-session-secret-change-before-production"),
+});
