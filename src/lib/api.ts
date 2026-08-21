@@ -309,3 +309,42 @@ export const sendTutorMessage = (
     method: "POST",
     body: JSON.stringify({ message }),
   });
+
+export const getAnalytics = () =>
+  request<{
+    dueCount: number;
+    retentionRate: number;
+    streak: number;
+    heatmap: Array<{
+      date: string;
+      count: number;
+    }>;
+    moduleStats: Array<{
+      id: number;
+      title: string;
+      reviews: number;
+      sessions: number;
+    }>;
+  }>("/api/analytics/overview");
+
+export const getPreferences = () =>
+  request<{
+    preferences: {
+      dailyGoalMinutes: number;
+      preferredSessionMinutes: number;
+    };
+  }>("/api/preferences");
+
+export const savePreferences = (input: {
+  dailyGoalMinutes: number;
+  preferredSessionMinutes: number;
+}) =>
+  request<{
+    preferences: {
+      dailyGoalMinutes: number;
+      preferredSessionMinutes: number;
+    };
+  }>("/api/preferences", {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });

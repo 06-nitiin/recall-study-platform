@@ -1,5 +1,5 @@
 import { and, desc, eq, lte, or } from "drizzle-orm";
-import { cardReviewStates, flashcards, materials, moduleGuides, modules, quizQuestions, quizResponses, reviewEvents, studySessions, tutorMessages, users } from "../../drizzle/schema";
+import { cardReviewStates, flashcards, materials, moduleGuides, modules, quizQuestions, quizResponses, reviewEvents, studyPreferences, studySessions, tutorMessages, users } from "../../drizzle/schema";
 import { db } from "./client";
 
 export async function findUserByEmail(email: string) {
@@ -99,3 +99,7 @@ export async function recordQuizResponse(input: { userId: number; sessionId: num
 
 export async function listTutorMessages(moduleId: number, userId: number) { return db.select().from(tutorMessages).where(and(eq(tutorMessages.moduleId, moduleId), eq(tutorMessages.userId, userId))).orderBy(tutorMessages.createdAt).all(); }
 export async function addTutorMessage(input: { moduleId: number; userId: number; role: "user" | "assistant"; content: string; citedMaterialIds?: number[] }) { const result = db.insert(tutorMessages).values({ ...input, citedMaterialIdsJson: input.citedMaterialIds ? JSON.stringify(input.citedMaterialIds) : null, createdAt: new Date() }).run(); return db.select().from(tutorMessages).where(eq(tutorMessages.id, Number(result.lastInsertRowid))).get(); }
+
+export async function getPreferences(userId: number) { const found = db.select().from(studyPreferences).where(eq(studyPreferences.userId, userId)).get(); if (found) return found; const now = new Date(); const result = db.insert(studyPreferences).values({ userId, updatedAt: now }).run(); return db.select().from(studyPreferences).where(eq(studyPreferences.id, Number(result.lastInsertRowid))).get(); }
+export async function updatePreferences(userId: number, input: { dailyGoalMinutes: number; preferredSessionMinutes: number }) { await getPreferences(userId); db.update(studyPreferences).set({ ...input, updatedAt: new Date() }).where(eq(studyPreferences.userId, userId)).run(); return getPreferences(userId); }
+export async function getAnalyticsData(userId: number) { const ownedModules = await listModulesForUser(userId); const events = db.select().from(reviewEvents).where(eq(reviewEvents.userId, userId)).all(); const states = db.select().from(cardReviewStates).where(eq(cardReviewStates.userId, userId)).all(); const sessions = db.select().from(studySessions).where(eq(studySessions.userId, userId)).all(); return { modules: ownedModules, events, states, sessions }; }

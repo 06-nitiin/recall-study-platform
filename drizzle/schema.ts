@@ -121,3 +121,11 @@ export const tutorMessages = sqliteTable("tutor_messages", {
   citedMaterialIdsJson: text("cited_material_ids_json"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
+
+export const studyPreferences = sqliteTable("study_preferences", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  dailyGoalMinutes: integer("daily_goal_minutes").notNull().default(20),
+  preferredSessionMinutes: integer("preferred_session_minutes").notNull().default(15),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});

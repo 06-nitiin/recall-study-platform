@@ -9,3 +9,10 @@
 - [x] Add owner-scoped local material uploads, safe file validation, and persisted material metadata.
 - [x] Add deterministic text extraction for plain text and Markdown materials, plus extraction-status controls and tests.
 - [x] Deliver the Standalone Milestone 2 source files, migration, validation commands, and Git commit guide.
+- [x] Add generated-study content, adaptive review state, review events, and deterministic SM-2-style scheduling.
+- [x] Add flashcard and multiple-choice quiz study sessions with confidence and performance tracking.
+- [x] Add a private module-scoped tutor chat with persisted messages and explicit local answer boundaries.
+- [x] Deliver the Standalone Milestone 3 source files, migration, validation commands, and Git commit guide.
+- [x] Add owner-scoped progress analytics, retention and workload metrics, study heatmap data, and preferences.
+- [x] Add final accessibility, security, error-handling, test coverage, and standalone project documentation improvements.
+- [x] Deliver the Standalone Milestone 4 source files, migration, validation commands, and Git commit guide.
