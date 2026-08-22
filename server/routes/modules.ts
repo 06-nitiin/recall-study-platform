@@ -3,19 +3,28 @@ import { Router } from "express";
 import {
   createModuleForUser,
   createNoteForModule,
+  createTaskForModule,
   deleteModuleForUser,
   deleteNoteForUser,
+  deleteTaskForUser,
   exportModuleBackupForUser,
   getModuleForUser,
   listModulesForUser,
   listNotesForModuleUser,
+  listTasksForModuleUser,
   restoreModuleBackupForUser,
+  setTaskCompleteForUser,
   updateModuleForUser,
   updateNoteForUser,
 } from "../db/queries";
 
 import { moduleBackupSchema } from "../lib/backup";
-import { moduleSchema, noteSchema } from "../lib/schemas";
+import {
+  moduleSchema,
+  noteSchema,
+  taskSchema,
+} from "../lib/schemas";
+
 import { requireUser } from "../middleware/requireUser";
 
 export const modulesRouter = Router();
@@ -177,6 +186,111 @@ modulesRouter.delete(
       if (!deleted) {
         return response.status(404).json({
           error: "Note not found.",
+        });
+      }
+
+      response.status(204).end();
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+modulesRouter.get(
+  "/:moduleId/tasks",
+  async (request, response, next) => {
+    try {
+      const module = await getModuleForUser(
+        Number(request.params.moduleId),
+        request.user!.id,
+      );
+
+      if (!module) {
+        return response.status(404).json({
+          error: "Module not found.",
+        });
+      }
+
+      response.json({
+        tasks: await listTasksForModuleUser(
+          module.id,
+          request.user!.id,
+        ),
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+modulesRouter.post(
+  "/:moduleId/tasks",
+  async (request, response, next) => {
+    try {
+      const module = await getModuleForUser(
+        Number(request.params.moduleId),
+        request.user!.id,
+      );
+
+      if (!module) {
+        return response.status(404).json({
+          error: "Module not found.",
+        });
+      }
+
+      response.status(201).json({
+        task: await createTaskForModule(
+          module.id,
+          taskSchema.parse(request.body),
+        ),
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+modulesRouter.patch(
+  "/tasks/:taskId/complete",
+  async (request, response, next) => {
+    try {
+      if (typeof request.body?.completed !== "boolean") {
+        return response.status(400).json({
+          error: "Provide a completion state.",
+        });
+      }
+
+      const task = await setTaskCompleteForUser(
+        Number(request.params.taskId),
+        request.user!.id,
+        request.body.completed,
+      );
+
+      if (!task) {
+        return response.status(404).json({
+          error: "Task not found.",
+        });
+      }
+
+      response.json({ task });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+modulesRouter.delete(
+  "/tasks/:taskId",
+  async (request, response, next) => {
+    try {
+      const deleted = await deleteTaskForUser(
+        Number(request.params.taskId),
+        request.user!.id,
+      );
+
+      if (!deleted) {
+        return response.status(404).json({
+          error: "Task not found.",
         });
       }
 

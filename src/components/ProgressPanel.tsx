@@ -82,7 +82,7 @@ export function ProgressPanel() {
 
       {analytics ? (
         <>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <div className="rounded-xl bg-emerald-50 p-4">
               <p className="text-xs font-semibold text-emerald-800">
                 Cards due
@@ -106,7 +106,6 @@ export function ProgressPanel() {
                 <Flame className="size-3.5" />
                 Current streak
               </p>
-
               <p className="mt-2 text-3xl font-semibold">
                 {analytics.streak} days
               </p>
@@ -116,17 +115,23 @@ export function ProgressPanel() {
               <p className="text-xs font-semibold text-indigo-800">
                 Focus today
               </p>
-
               <p className="mt-2 text-3xl font-semibold">
                 {analytics.focusMinutesToday}m
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-rose-50 p-4">
+              <p className="text-xs font-semibold text-rose-800">
+                Open tasks
+              </p>
+              <p className="mt-2 text-3xl font-semibold">
+                {analytics.openTaskCount}
               </p>
             </div>
           </div>
 
           <div className="mt-6">
-            <p className="text-sm font-semibold">
-              Study heatmap
-            </p>
+            <p className="text-sm font-semibold">Study heatmap</p>
 
             <div className="mt-3 grid grid-cols-7 gap-1.5">
               {analytics.heatmap.map((day) => (
@@ -137,8 +142,7 @@ export function ProgressPanel() {
                   style={{
                     backgroundColor: day.count
                       ? `rgba(5, 150, 105, ${
-                          0.18 +
-                          (day.count / maxHeat) * 0.72
+                          0.18 + (day.count / maxHeat) * 0.72
                         })`
                       : "#f1f5f9",
                   }}
@@ -147,8 +151,8 @@ export function ProgressPanel() {
             </div>
 
             <p className="mt-2 text-xs text-slate-500">
-              Each square represents one day of recorded
-              flashcard reviews.
+              Each square represents one day of recorded flashcard
+              reviews.
             </p>
           </div>
 
@@ -169,8 +173,8 @@ export function ProgressPanel() {
                     </span>
 
                     <span className="text-slate-500">
-                      {module.reviews} reviews ·{" "}
-                      {module.sessions} sessions
+                      {module.reviews} reviews · {module.sessions}{" "}
+                      sessions
                     </span>
                   </li>
                 ))}
@@ -187,7 +191,6 @@ export function ProgressPanel() {
 
               <label className="mt-3 block text-xs font-semibold text-slate-600">
                 Daily goal (minutes)
-
                 <input
                   className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm"
                   type="number"
@@ -207,7 +210,6 @@ export function ProgressPanel() {
 
               <label className="mt-3 block text-xs font-semibold text-slate-600">
                 Preferred session (minutes)
-
                 <input
                   className="mt-1 h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm"
                   type="number"
@@ -225,10 +227,7 @@ export function ProgressPanel() {
                 />
               </label>
 
-              <button
-                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-sm font-semibold text-white"
-                type="submit"
-              >
+              <button className="mt-4 inline-flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-sm font-semibold text-white">
                 <Save className="size-4" />
                 {saved ? "Saved" : "Save preferences"}
               </button>

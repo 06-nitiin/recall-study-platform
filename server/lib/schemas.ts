@@ -17,3 +17,8 @@ export const noteSchema = z.object({
   title: z.string().trim().min(1, "A note title is required.").max(160),
   body: z.string().trim().min(1, "Write something before saving the note.").max(20_000),
 });
+
+export const taskSchema = z.object({
+  title: z.string().trim().min(1, "A task title is required.").max(240),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use a valid due date.").nullable().optional(),
+});

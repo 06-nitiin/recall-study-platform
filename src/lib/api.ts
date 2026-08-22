@@ -39,10 +39,17 @@ export type ModuleNote = {
   updatedAt: string;
 };
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-) {
+export type ModuleTask = {
+  id: number;
+  moduleId: number;
+  title: string;
+  dueDate: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+async function request<T>(path: string, options: RequestInit = {}) {
   const response = await fetch(path, {
     credentials: "include",
     headers: {
@@ -63,8 +70,7 @@ async function request<T>(
   return payload;
 }
 
-export const getHealthStatus = () =>
-  request<HealthStatus>("/api/health");
+export const getHealthStatus = () => request<HealthStatus>("/api/health");
 
 export const getCurrentUser = () =>
   request<{ user: CurrentUser }>("/api/auth/me");
@@ -134,10 +140,7 @@ export const listMaterials = (moduleId: number) =>
     `/api/modules/${moduleId}/materials`,
   );
 
-export const uploadMaterial = async (
-  moduleId: number,
-  file: File,
-) => {
+export const uploadMaterial = async (moduleId: number, file: File) => {
   const response = await fetch(
     `/api/modules/${moduleId}/materials/upload`,
     {
@@ -146,9 +149,7 @@ export const uploadMaterial = async (
       headers: {
         "Content-Type":
           file.type ||
-          (file.name.endsWith(".md")
-            ? "text/markdown"
-            : "text/plain"),
+          (file.name.endsWith(".md") ? "text/markdown" : "text/plain"),
         "x-material-filename": encodeURIComponent(file.name),
       },
       body: file,
@@ -184,13 +185,10 @@ export const getMaterialText = (materialId: number) =>
   }>(`/api/materials/${materialId}/text`);
 
 export const deleteMaterial = async (materialId: number) => {
-  const response = await fetch(
-    `/api/materials/${materialId}`,
-    {
-      method: "DELETE",
-      credentials: "include",
-    },
-  );
+  const response = await fetch(`/api/materials/${materialId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("Could not delete this material.");
@@ -343,6 +341,7 @@ export const getAnalytics = () =>
     retentionRate: number;
     streak: number;
     focusMinutesToday: number;
+    openTaskCount: number;
     heatmap: Array<{
       date: string;
       count: number;
@@ -387,9 +386,7 @@ export const restoreModuleBackup = (backup: unknown) =>
   });
 
 export const listNotes = (moduleId: number) =>
-  request<{ notes: ModuleNote[] }>(
-    `/api/modules/${moduleId}/notes`,
-  );
+  request<{ notes: ModuleNote[] }>(`/api/modules/${moduleId}/notes`);
 
 export const createNote = (
   moduleId: number,
@@ -398,13 +395,10 @@ export const createNote = (
     body: string;
   },
 ) =>
-  request<{ note: ModuleNote }>(
-    `/api/modules/${moduleId}/notes`,
-    {
-      method: "POST",
-      body: JSON.stringify(input),
-    },
-  );
+  request<{ note: ModuleNote }>(`/api/modules/${moduleId}/notes`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 
 export const updateNote = (
   noteId: number,
@@ -413,24 +407,56 @@ export const updateNote = (
     body: string;
   },
 ) =>
-  request<{ note: ModuleNote }>(
-    `/api/modules/notes/${noteId}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    },
-  );
+  request<{ note: ModuleNote }>(`/api/modules/notes/${noteId}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
 
 export const deleteNote = async (noteId: number) => {
-  const response = await fetch(
-    `/api/modules/notes/${noteId}`,
-    {
-      method: "DELETE",
-      credentials: "include",
-    },
-  );
+  const response = await fetch(`/api/modules/notes/${noteId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
 
   if (!response.ok) {
     throw new Error("Could not delete this note.");
+  }
+};
+
+export const listTasks = (moduleId: number) =>
+  request<{ tasks: ModuleTask[] }>(`/api/modules/${moduleId}/tasks`);
+
+export const createTask = (
+  moduleId: number,
+  input: {
+    title: string;
+    dueDate: string | null;
+  },
+) =>
+  request<{ task: ModuleTask }>(`/api/modules/${moduleId}/tasks`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+export const setTaskComplete = (
+  taskId: number,
+  completed: boolean,
+) =>
+  request<{ task: ModuleTask }>(
+    `/api/modules/tasks/${taskId}/complete`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ completed }),
+    },
+  );
+
+export const deleteTask = async (taskId: number) => {
+  const response = await fetch(`/api/modules/tasks/${taskId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Could not delete this task.");
   }
 };
