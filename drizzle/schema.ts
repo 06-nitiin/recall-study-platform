@@ -95,11 +95,12 @@ export const studySessions = sqliteTable("study_sessions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   moduleId: integer("module_id").notNull().references(() => modules.id, { onDelete: "cascade" }),
-  kind: text("kind", { enum: ["flashcard", "quiz"] }).notNull(),
+  kind: text("kind", { enum: ["flashcard", "quiz", "focus"] }).notNull(),
   startedAt: integer("started_at", { mode: "timestamp_ms" }).notNull(),
   endedAt: integer("ended_at", { mode: "timestamp_ms" }),
   correctCount: integer("correct_count").notNull().default(0),
   answerCount: integer("answer_count").notNull().default(0),
+  durationSeconds: integer("duration_seconds").notNull().default(0),
 });
 
 export const quizResponses = sqliteTable("quiz_responses", {

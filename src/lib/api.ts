@@ -30,22 +30,6 @@ export type StudyMaterial = {
   updatedAt: string;
 };
 
-export type Flashcard = {
-  id: number;
-  prompt: string;
-  answer: string;
-  explanation: string | null;
-  moduleId: number;
-};
-
-export type QuizQuestion = {
-  id: number;
-  prompt: string;
-  optionsJson: string;
-  correctOptionId: string;
-  explanation: string | null;
-};
-
 async function request<T>(
   path: string,
   options: RequestInit = {},
@@ -204,6 +188,22 @@ export const deleteMaterial = async (materialId: number) => {
   }
 };
 
+export type Flashcard = {
+  id: number;
+  prompt: string;
+  answer: string;
+  explanation: string | null;
+  moduleId: number;
+};
+
+export type QuizQuestion = {
+  id: number;
+  prompt: string;
+  optionsJson: string;
+  correctOptionId: string;
+  explanation: string | null;
+};
+
 export const generateStudyContent = (moduleId: number) =>
   request<{
     flashcardCount: number;
@@ -284,6 +284,24 @@ export const answerQuiz = (
     body: JSON.stringify(input),
   });
 
+export const startFocusSession = (moduleId: number) =>
+  request<{
+    session: {
+      id: number;
+      startedAt: string;
+    };
+  }>(`/api/modules/${moduleId}/focus-sessions`, {
+    method: "POST",
+  });
+
+export const finishFocusSession = (sessionId: number) =>
+  request<{
+    durationSeconds: number;
+    endedAt: string;
+  }>(`/api/focus-sessions/${sessionId}/finish`, {
+    method: "POST",
+  });
+
 export const getTutorMessages = (moduleId: number) =>
   request<{
     messages: Array<{
@@ -315,6 +333,7 @@ export const getAnalytics = () =>
     dueCount: number;
     retentionRate: number;
     streak: number;
+    focusMinutesToday: number;
     heatmap: Array<{
       date: string;
       count: number;

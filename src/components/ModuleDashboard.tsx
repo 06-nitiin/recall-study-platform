@@ -7,7 +7,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-
 import {
   createModule,
   deleteModule,
@@ -17,11 +16,11 @@ import {
   type CurrentUser,
   type StudyModule,
 } from "../lib/api";
-
+import { FocusTimer } from "./FocusTimer";
 import { MaterialPanel } from "./MaterialPanel";
-import { StudyPanel } from "./StudyPanel";
-import { ProgressPanel } from "./ProgressPanel";
 import { ModuleBackupPanel } from "./ModuleBackupPanel";
+import { ProgressPanel } from "./ProgressPanel";
+import { StudyPanel } from "./StudyPanel";
 
 export function ModuleDashboard({
   user,
@@ -90,7 +89,6 @@ export function ModuleDashboard({
 
   const edit = (module: StudyModule) => {
     setEditing(module);
-
     setDraft({
       title: module.title,
       description: module.description ?? "",
@@ -124,8 +122,8 @@ export function ModuleDashboard({
           </h1>
 
           <p className="mt-3 max-w-xl leading-7 text-slate-600">
-            Create a module for each course or subject, then attach private
-            source notes.
+            Create a module for each course or subject, then attach
+            private source notes.
           </p>
         </div>
 
@@ -148,7 +146,6 @@ export function ModuleDashboard({
         >
           <div className="flex items-center gap-2 text-emerald-300">
             <BookPlus className="size-5" />
-
             <span className="text-sm font-semibold">
               {editing ? "Edit module" : "New module"}
             </span>
@@ -190,7 +187,6 @@ export function ModuleDashboard({
 
           <button className="mt-5 flex items-center gap-2 rounded-xl bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-950">
             <Plus className="size-4" />
-
             {editing ? "Save changes" : "Create module"}
           </button>
 
@@ -240,8 +236,8 @@ export function ModuleDashboard({
             </p>
           ) : modules.length === 0 ? (
             <p className="mt-7 rounded-xl bg-slate-50 p-5 leading-7 text-slate-600">
-              No modules yet. Create your first course or subject on
-              the left.
+              No modules yet. Create your first course or subject
+              on the left.
             </p>
           ) : (
             <ul className="mt-6 divide-y divide-slate-100">
@@ -296,8 +292,8 @@ export function ModuleDashboard({
       {selectedModule && (
         <div className="mx-auto max-w-6xl">
           <MaterialPanel module={selectedModule} />
-
           <StudyPanel module={selectedModule} />
+          <FocusTimer module={selectedModule} />
 
           <ModuleBackupPanel
             module={selectedModule}
