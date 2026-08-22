@@ -71,9 +71,9 @@ async function request<T>(
     ...options,
   });
 
-  const payload = (await response.json().catch(() => ({}))) as {
-    error?: string;
-  } & T;
+  const payload = (await response
+    .json()
+    .catch(() => ({}))) as { error?: string } & T;
 
   if (!response.ok) {
     throw new Error(payload.error ?? "Request failed.");
@@ -132,10 +132,13 @@ export const updateModule = (
     description: string;
   },
 ) =>
-  request<{ module: StudyModule }>(`/api/modules/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify(input),
-  });
+  request<{ module: StudyModule }>(
+    `/api/modules/${id}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    },
+  );
 
 export const deleteModule = async (id: number) => {
   const response = await fetch(`/api/modules/${id}`, {
@@ -183,7 +186,8 @@ export const uploadMaterial = async (
 
   if (!response.ok) {
     throw new Error(
-      payload.error ?? "Could not upload this material.",
+      payload.error ??
+        "Could not upload this material.",
     );
   }
 
@@ -204,7 +208,9 @@ export const getMaterialText = (materialId: number) =>
     extractedText: string;
   }>(`/api/materials/${materialId}/text`);
 
-export const deleteMaterial = async (materialId: number) => {
+export const deleteMaterial = async (
+  materialId: number,
+) => {
   const response = await fetch(
     `/api/materials/${materialId}`,
     {
@@ -214,7 +220,9 @@ export const deleteMaterial = async (materialId: number) => {
   );
 
   if (!response.ok) {
-    throw new Error("Could not delete this material.");
+    throw new Error(
+      "Could not delete this material.",
+    );
   }
 };
 
@@ -233,6 +241,7 @@ export type QuizQuestion = {
   optionsJson: string;
   correctOptionId: string;
   explanation: string | null;
+  isGenerated: boolean;
 };
 
 export const generateStudyContent = (moduleId: number) =>
@@ -400,7 +409,9 @@ export const savePreferences = (input: {
   });
 
 export const exportModuleBackup = (moduleId: number) =>
-  request<unknown>(`/api/modules/${moduleId}/backup`);
+  request<unknown>(
+    `/api/modules/${moduleId}/backup`,
+  );
 
 export const restoreModuleBackup = (backup: unknown) =>
   request<{ module: StudyModule }>(
@@ -552,6 +563,64 @@ export const deleteManualFlashcard = async (
   if (!response.ok) {
     throw new Error(
       "Could not delete this manual flashcard.",
+    );
+  }
+};
+
+export const createManualQuizQuestion = (
+  moduleId: number,
+  input: {
+    prompt: string;
+    options: Array<{
+      id: string;
+      text: string;
+    }>;
+    correctOptionId: string;
+    explanation: string | null;
+  },
+) =>
+  request<{ question: QuizQuestion }>(
+    `/api/modules/${moduleId}/quiz-questions`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
+
+export const updateManualQuizQuestion = (
+  questionId: number,
+  input: {
+    prompt: string;
+    options: Array<{
+      id: string;
+      text: string;
+    }>;
+    correctOptionId: string;
+    explanation: string | null;
+  },
+) =>
+  request<{ question: QuizQuestion }>(
+    `/api/quiz-questions/${questionId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    },
+  );
+
+export const deleteManualQuizQuestion = async (
+  questionId: number,
+) => {
+  const response = await fetch(
+    `/api/quiz-questions/${questionId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Could not delete this manual quiz question.",
     );
   }
 };

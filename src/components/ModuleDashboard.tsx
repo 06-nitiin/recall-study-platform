@@ -6,7 +6,11 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
 import {
   createModule,
   deleteModule,
@@ -25,6 +29,7 @@ import { NotesPanel } from "./NotesPanel";
 import { TasksPanel } from "./TasksPanel";
 import { SearchPanel } from "./SearchPanel";
 import { FlashcardAuthorPanel } from "./FlashcardAuthorPanel";
+import { QuizAuthorPanel } from "./QuizAuthorPanel";
 
 export function ModuleDashboard({
   user,
@@ -40,7 +45,8 @@ export function ModuleDashboard({
     title: "",
     description: "",
   });
-  const [editing, setEditing] = useState<StudyModule | null>(null);
+  const [editing, setEditing] =
+    useState<StudyModule | null>(null);
   const [selectedModule, setSelectedModule] =
     useState<StudyModule | null>(null);
 
@@ -98,7 +104,11 @@ export function ModuleDashboard({
   };
 
   const remove = async (module: StudyModule) => {
-    if (!window.confirm(`Delete “${module.title}”?`)) {
+    if (
+      !window.confirm(
+        `Delete “${module.title}”?`
+      )
+    ) {
       return;
     }
 
@@ -124,8 +134,8 @@ export function ModuleDashboard({
           </h1>
 
           <p className="mt-3 max-w-xl leading-7 text-slate-600">
-            Create a module for each course or subject, then attach
-            private source notes.
+            Create a module for each course or subject,
+            then attach private source notes.
           </p>
         </div>
 
@@ -195,6 +205,7 @@ export function ModuleDashboard({
 
           <button className="mt-5 flex items-center gap-2 rounded-xl bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-950">
             <Plus className="size-4" />
+
             {editing ? "Save changes" : "Create module"}
           </button>
 
@@ -244,8 +255,8 @@ export function ModuleDashboard({
             </p>
           ) : modules.length === 0 ? (
             <p className="mt-7 rounded-xl bg-slate-50 p-5 leading-7 text-slate-600">
-              No modules yet. Create your first course or subject on
-              the left.
+              No modules yet. Create your first course
+              or subject on the left.
             </p>
           ) : (
             <ul className="mt-6 divide-y divide-slate-100">
@@ -260,14 +271,17 @@ export function ModuleDashboard({
                     </p>
 
                     <p className="mt-1 text-sm leading-6 text-slate-600">
-                      {module.description || "No description yet."}
+                      {module.description ||
+                        "No description yet."}
                     </p>
                   </div>
 
                   <div className="flex gap-2">
                     <button
                       className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-                      onClick={() => setSelectedModule(module)}
+                      onClick={() =>
+                        setSelectedModule(module)
+                      }
                       aria-label={`Open materials for ${module.title}`}
                     >
                       <BookOpen className="size-4" />
@@ -299,11 +313,21 @@ export function ModuleDashboard({
       {selectedModule && (
         <div className="mx-auto max-w-6xl">
           <MaterialPanel module={selectedModule} />
+
           <StudyPanel module={selectedModule} />
-          <FlashcardAuthorPanel module={selectedModule} />
+
+          <FlashcardAuthorPanel
+            module={selectedModule}
+          />
+
+          <QuizAuthorPanel module={selectedModule} />
+
           <NotesPanel module={selectedModule} />
+
           <TasksPanel module={selectedModule} />
+
           <FocusTimer module={selectedModule} />
+
           <ModuleBackupPanel
             module={selectedModule}
             onRestored={refresh}

@@ -8,8 +8,10 @@ import {
   addTutorMessage,
   createFocusSession,
   createManualFlashcard,
+  createManualQuizQuestion,
   createQuizSession,
   deleteManualFlashcardForUser,
+  deleteManualQuizQuestionForUser,
   finishFocusSession,
   getGeneratedStudyContent,
   getModuleForUser,
@@ -20,8 +22,12 @@ import {
   recordReview,
   replaceGeneratedStudyContent,
   updateManualFlashcardForUser,
+  updateManualQuizQuestionForUser,
 } from "../db/queries";
-import { flashcardSchema } from "../lib/schemas";
+import {
+  flashcardSchema,
+  manualQuizQuestionSchema,
+} from "../lib/schemas";
 import { scheduleReview, type ReviewRating } from "../lib/sm2";
 import { requireUser } from "../middleware/requireUser";
 
@@ -46,7 +52,7 @@ studyRouter.post(
     try {
       const module = await ownedModule(
         Number(request.params.moduleId),
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -56,10 +62,13 @@ studyRouter.post(
       }
 
       const generated = await generateStudyContent(
-        await listReadyMaterialsForModule(module.id),
+        await listReadyMaterialsForModule(module.id)
       );
 
-      await replaceGeneratedStudyContent(module.id, generated);
+      await replaceGeneratedStudyContent(
+        module.id,
+        generated
+      );
 
       response.json({
         flashcardCount: generated.flashcards.length,
@@ -74,7 +83,7 @@ studyRouter.post(
 
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.get(
@@ -83,7 +92,7 @@ studyRouter.get(
     try {
       const module = await ownedModule(
         Number(request.params.moduleId),
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -92,11 +101,13 @@ studyRouter.get(
           .json({ error: "Module not found." });
       }
 
-      response.json(await getGeneratedStudyContent(module.id));
+      response.json(
+        await getGeneratedStudyContent(module.id)
+      );
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.get(
@@ -105,7 +116,7 @@ studyRouter.get(
     try {
       const module = await ownedModule(
         Number(request.params.moduleId),
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -117,13 +128,13 @@ studyRouter.get(
       response.json({
         cards: await listDueFlashcards(
           request.user!.id,
-          module.id,
+          module.id
         ),
       });
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.post(
@@ -132,7 +143,7 @@ studyRouter.post(
     try {
       const module = await ownedModule(
         Number(request.params.moduleId),
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -144,13 +155,13 @@ studyRouter.post(
       response.status(201).json({
         flashcard: await createManualFlashcard(
           module.id,
-          flashcardSchema.parse(request.body),
+          flashcardSchema.parse(request.body)
         ),
       });
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.patch(
@@ -161,42 +172,127 @@ studyRouter.patch(
         await updateManualFlashcardForUser(
           Number(request.params.flashcardId),
           request.user!.id,
-          flashcardSchema.parse(request.body),
+          flashcardSchema.parse(request.body)
         );
 
       if (!flashcard) {
         return response
           .status(404)
-          .json({ error: "Manual flashcard not found." });
+          .json({
+            error: "Manual flashcard not found.",
+          });
       }
 
       response.json({ flashcard });
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.delete(
   "/flashcards/:flashcardId",
   async (request, response, next) => {
     try {
-      const deleted = await deleteManualFlashcardForUser(
-        Number(request.params.flashcardId),
-        request.user!.id,
-      );
-
-      if (!deleted) {
+      if (
+        !(await deleteManualFlashcardForUser(
+          Number(request.params.flashcardId),
+          request.user!.id
+        ))
+      ) {
         return response
           .status(404)
-          .json({ error: "Manual flashcard not found." });
+          .json({
+            error: "Manual flashcard not found.",
+          });
       }
 
       response.status(204).end();
     } catch (error) {
       next(error);
     }
-  },
+  }
+);
+
+studyRouter.post(
+  "/modules/:moduleId/quiz-questions",
+  async (request, response, next) => {
+    try {
+      const module = await ownedModule(
+        Number(request.params.moduleId),
+        request.user!.id
+      );
+
+      if (!module) {
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
+      }
+
+      response.status(201).json({
+        question: await createManualQuizQuestion(
+          module.id,
+          manualQuizQuestionSchema.parse(
+            request.body
+          )
+        ),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+studyRouter.patch(
+  "/quiz-questions/:questionId",
+  async (request, response, next) => {
+    try {
+      const question =
+        await updateManualQuizQuestionForUser(
+          Number(request.params.questionId),
+          request.user!.id,
+          manualQuizQuestionSchema.parse(
+            request.body
+          )
+        );
+
+      if (!question) {
+        return response
+          .status(404)
+          .json({
+            error: "Manual quiz question not found.",
+          });
+      }
+
+      response.json({ question });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+studyRouter.delete(
+  "/quiz-questions/:questionId",
+  async (request, response, next) => {
+    try {
+      if (
+        !(await deleteManualQuizQuestionForUser(
+          Number(request.params.questionId),
+          request.user!.id
+        ))
+      ) {
+        return response
+          .status(404)
+          .json({
+            error: "Manual quiz question not found.",
+          });
+      }
+
+      response.status(204).end();
+    } catch (error) {
+      next(error);
+    }
+  }
 );
 
 studyRouter.post(
@@ -235,7 +331,7 @@ studyRouter.post(
 
       const module = await ownedModule(
         moduleId,
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -247,13 +343,15 @@ studyRouter.post(
       const nextReview = scheduleReview(
         state,
         rating,
-        confidence,
+        confidence
       );
 
       await recordReview({
         userId: request.user!.id,
         moduleId,
-        flashcardId: Number(request.params.flashcardId),
+        flashcardId: Number(
+          request.params.flashcardId
+        ),
         rating,
         confidence,
         ...nextReview,
@@ -263,7 +361,7 @@ studyRouter.post(
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.post(
@@ -272,7 +370,7 @@ studyRouter.post(
     try {
       const module = await ownedModule(
         Number(request.params.moduleId),
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -283,14 +381,14 @@ studyRouter.post(
 
       const session = await createQuizSession(
         request.user!.id,
-        module.id,
+        module.id
       );
 
       response.status(201).json({ session });
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.post(
@@ -299,7 +397,7 @@ studyRouter.post(
     try {
       const module = await ownedModule(
         Number(request.params.moduleId),
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -311,13 +409,13 @@ studyRouter.post(
       response.status(201).json({
         session: await createFocusSession(
           request.user!.id,
-          module.id,
+          module.id
         ),
       });
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.post(
@@ -326,20 +424,22 @@ studyRouter.post(
     try {
       const finished = await finishFocusSession(
         request.user!.id,
-        Number(request.params.sessionId),
+        Number(request.params.sessionId)
       );
 
       if (!finished) {
         return response
           .status(404)
-          .json({ error: "Focus session not found." });
+          .json({
+            error: "Focus session not found.",
+          });
       }
 
       response.json(finished);
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.post(
@@ -370,7 +470,9 @@ studyRouter.post(
 
       const result = await recordQuizResponse({
         userId: request.user!.id,
-        sessionId: Number(request.params.sessionId),
+        sessionId: Number(
+          request.params.sessionId
+        ),
         questionId,
         selectedOptionId,
         confidence,
@@ -379,14 +481,16 @@ studyRouter.post(
       if (!result) {
         return response
           .status(404)
-          .json({ error: "Quiz question not found." });
+          .json({
+            error: "Quiz question not found.",
+          });
       }
 
       response.json(result);
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.get(
@@ -395,7 +499,7 @@ studyRouter.get(
     try {
       const module = await ownedModule(
         Number(request.params.moduleId),
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -407,13 +511,13 @@ studyRouter.get(
       response.json({
         messages: await listTutorMessages(
           module.id,
-          request.user!.id,
+          request.user!.id
         ),
       });
     } catch (error) {
       next(error);
     }
-  },
+  }
 );
 
 studyRouter.post(
@@ -422,7 +526,7 @@ studyRouter.post(
     try {
       const module = await ownedModule(
         Number(request.params.moduleId),
-        request.user!.id,
+        request.user!.id
       );
 
       if (!module) {
@@ -432,19 +536,21 @@ studyRouter.post(
       }
 
       const question = String(
-        request.body?.message ?? "",
+        request.body?.message ?? ""
       ).trim();
 
       if (!question || question.length > 3000) {
-        return response.status(400).json({
-          error:
-            "Enter a tutor question under 3,000 characters.",
-        });
+        return response
+          .status(400)
+          .json({
+            error:
+              "Enter a tutor question under 3,000 characters.",
+          });
       }
 
       const history = await listTutorMessages(
         module.id,
-        request.user!.id,
+        request.user!.id
       );
 
       await addTutorMessage({
@@ -457,7 +563,7 @@ studyRouter.post(
       const answer = await answerTutorQuestion({
         question,
         materials: await listReadyMaterialsForModule(
-          module.id,
+          module.id
         ),
         history: history.map((message) => ({
           role: message.role,
@@ -483,5 +589,5 @@ studyRouter.post(
 
       next(error);
     }
-  },
+  }
 );

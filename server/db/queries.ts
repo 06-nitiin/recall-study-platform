@@ -60,7 +60,7 @@ export async function createModuleForUser(
   input: {
     title: string;
     description?: string | null;
-  },
+  }
 ) {
   const now = new Date();
 
@@ -80,7 +80,7 @@ export async function createModuleForUser(
 
 export async function getModuleForUser(
   moduleId: number,
-  userId: number,
+  userId: number
 ) {
   return db
     .select()
@@ -88,8 +88,8 @@ export async function getModuleForUser(
     .where(
       and(
         eq(modules.id, moduleId),
-        eq(modules.userId, userId),
-      ),
+        eq(modules.userId, userId)
+      )
     )
     .get();
 }
@@ -100,7 +100,7 @@ export async function updateModuleForUser(
   input: {
     title: string;
     description?: string | null;
-  },
+  }
 ) {
   const result = db
     .update(modules)
@@ -112,8 +112,8 @@ export async function updateModuleForUser(
     .where(
       and(
         eq(modules.id, moduleId),
-        eq(modules.userId, userId),
-      ),
+        eq(modules.userId, userId)
+      )
     )
     .run();
 
@@ -124,7 +124,7 @@ export async function updateModuleForUser(
 
 export async function deleteModuleForUser(
   moduleId: number,
-  userId: number,
+  userId: number
 ) {
   return (
     db
@@ -132,8 +132,8 @@ export async function deleteModuleForUser(
       .where(
         and(
           eq(modules.id, moduleId),
-          eq(modules.userId, userId),
-        ),
+          eq(modules.userId, userId)
+        )
       )
       .run().changes > 0
   );
@@ -141,7 +141,7 @@ export async function deleteModuleForUser(
 
 export async function listNotesForModuleUser(
   moduleId: number,
-  userId: number,
+  userId: number
 ) {
   return db
     .select({ note: moduleNotes })
@@ -150,8 +150,8 @@ export async function listNotesForModuleUser(
     .where(
       and(
         eq(moduleNotes.moduleId, moduleId),
-        eq(modules.userId, userId),
-      ),
+        eq(modules.userId, userId)
+      )
     )
     .orderBy(desc(moduleNotes.updatedAt))
     .all()
@@ -163,7 +163,7 @@ export async function createNoteForModule(
   input: {
     title: string;
     body: string;
-  },
+  }
 ) {
   const now = new Date();
 
@@ -180,13 +180,15 @@ export async function createNoteForModule(
   return db
     .select()
     .from(moduleNotes)
-    .where(eq(moduleNotes.id, Number(result.lastInsertRowid)))
+    .where(
+      eq(moduleNotes.id, Number(result.lastInsertRowid))
+    )
     .get();
 }
 
 export async function getNoteForUser(
   noteId: number,
-  userId: number,
+  userId: number
 ) {
   return db
     .select({ note: moduleNotes })
@@ -195,8 +197,8 @@ export async function getNoteForUser(
     .where(
       and(
         eq(moduleNotes.id, noteId),
-        eq(modules.userId, userId),
-      ),
+        eq(modules.userId, userId)
+      )
     )
     .get()?.note;
 }
@@ -207,7 +209,7 @@ export async function updateNoteForUser(
   input: {
     title: string;
     body: string;
-  },
+  }
 ) {
   const note = await getNoteForUser(noteId, userId);
 
@@ -233,7 +235,7 @@ export async function updateNoteForUser(
 
 export async function deleteNoteForUser(
   noteId: number,
-  userId: number,
+  userId: number
 ) {
   const note = await getNoteForUser(noteId, userId);
 
@@ -241,7 +243,8 @@ export async function deleteNoteForUser(
     return false;
   }
 
-  db.delete(moduleNotes)
+  db
+    .delete(moduleNotes)
     .where(eq(moduleNotes.id, note.id))
     .run();
 
@@ -250,7 +253,7 @@ export async function deleteNoteForUser(
 
 export async function listTasksForModuleUser(
   moduleId: number,
-  userId: number,
+  userId: number
 ) {
   return db
     .select({ task: moduleTasks })
@@ -259,13 +262,13 @@ export async function listTasksForModuleUser(
     .where(
       and(
         eq(moduleTasks.moduleId, moduleId),
-        eq(modules.userId, userId),
-      ),
+        eq(modules.userId, userId)
+      )
     )
     .orderBy(
       moduleTasks.completedAt,
       moduleTasks.dueDate,
-      desc(moduleTasks.createdAt),
+      desc(moduleTasks.createdAt)
     )
     .all()
     .map((row) => row.task);
@@ -276,7 +279,7 @@ export async function createTaskForModule(
   input: {
     title: string;
     dueDate?: string | null;
-  },
+  }
 ) {
   const now = new Date();
 
@@ -294,13 +297,15 @@ export async function createTaskForModule(
   return db
     .select()
     .from(moduleTasks)
-    .where(eq(moduleTasks.id, Number(result.lastInsertRowid)))
+    .where(
+      eq(moduleTasks.id, Number(result.lastInsertRowid))
+    )
     .get();
 }
 
 export async function getTaskForUser(
   taskId: number,
-  userId: number,
+  userId: number
 ) {
   return db
     .select({ task: moduleTasks })
@@ -309,8 +314,8 @@ export async function getTaskForUser(
     .where(
       and(
         eq(moduleTasks.id, taskId),
-        eq(modules.userId, userId),
-      ),
+        eq(modules.userId, userId)
+      )
     )
     .get()?.task;
 }
@@ -318,7 +323,7 @@ export async function getTaskForUser(
 export async function setTaskCompleteForUser(
   taskId: number,
   userId: number,
-  completed: boolean,
+  completed: boolean
 ) {
   const task = await getTaskForUser(taskId, userId);
 
@@ -344,7 +349,7 @@ export async function setTaskCompleteForUser(
 
 export async function deleteTaskForUser(
   taskId: number,
-  userId: number,
+  userId: number
 ) {
   const task = await getTaskForUser(taskId, userId);
 
@@ -352,7 +357,8 @@ export async function deleteTaskForUser(
     return false;
   }
 
-  db.delete(moduleTasks)
+  db
+    .delete(moduleTasks)
     .where(eq(moduleTasks.id, task.id))
     .run();
 
@@ -389,13 +395,15 @@ export async function createMaterialForModule(input: {
   return db
     .select()
     .from(materials)
-    .where(eq(materials.id, Number(result.lastInsertRowid)))
+    .where(
+      eq(materials.id, Number(result.lastInsertRowid))
+    )
     .get();
 }
 
 export async function getMaterialForUser(
   materialId: number,
-  userId: number,
+  userId: number
 ) {
   return db
     .select({ material: materials })
@@ -404,8 +412,8 @@ export async function getMaterialForUser(
     .where(
       and(
         eq(materials.id, materialId),
-        eq(modules.userId, userId),
-      ),
+        eq(modules.userId, userId)
+      )
     )
     .get()?.material;
 }
@@ -414,7 +422,7 @@ export async function setMaterialExtraction(
   materialId: number,
   status: "ready" | "failed",
   extractedText?: string,
-  extractionError?: string,
+  extractionError?: string
 ) {
   return db
     .update(materials)
@@ -430,7 +438,7 @@ export async function setMaterialExtraction(
 
 export async function deleteMaterialForUser(
   materialId: number,
-  userId: number,
+  userId: number
 ) {
   const material = await getMaterialForUser(materialId, userId);
 
@@ -438,7 +446,8 @@ export async function deleteMaterialForUser(
     return undefined;
   }
 
-  db.delete(materials)
+  db
+    .delete(materials)
     .where(eq(materials.id, materialId))
     .run();
 
@@ -446,7 +455,7 @@ export async function deleteMaterialForUser(
 }
 
 export async function listReadyMaterialsForModule(
-  moduleId: number,
+  moduleId: number
 ) {
   return db
     .select()
@@ -454,8 +463,8 @@ export async function listReadyMaterialsForModule(
     .where(
       and(
         eq(materials.moduleId, moduleId),
-        eq(materials.extractionStatus, "ready"),
-      ),
+        eq(materials.extractionStatus, "ready")
+      )
     )
     .all();
 }
@@ -480,30 +489,33 @@ export async function replaceGeneratedStudyContent(
       correctOptionId: string;
       explanation?: string;
     }>;
-  },
+  }
 ) {
   const now = new Date();
 
   db.transaction((tx) => {
-    tx.delete(flashcards)
+    tx
+      .delete(flashcards)
       .where(
         and(
           eq(flashcards.moduleId, moduleId),
-          eq(flashcards.isGenerated, true),
-        ),
+          eq(flashcards.isGenerated, true)
+        )
       )
       .run();
 
-    tx.delete(quizQuestions)
+    tx
+      .delete(quizQuestions)
       .where(
         and(
           eq(quizQuestions.moduleId, moduleId),
-          eq(quizQuestions.isGenerated, true),
-        ),
+          eq(quizQuestions.isGenerated, true)
+        )
       )
       .run();
 
-    tx.insert(moduleGuides)
+    tx
+      .insert(moduleGuides)
       .values({
         moduleId,
         summary: content.summary,
@@ -521,7 +533,8 @@ export async function replaceGeneratedStudyContent(
       .run();
 
     if (content.flashcards.length) {
-      tx.insert(flashcards)
+      tx
+        .insert(flashcards)
         .values(
           content.flashcards.map((card) => ({
             moduleId,
@@ -530,13 +543,14 @@ export async function replaceGeneratedStudyContent(
             explanation: card.explanation ?? null,
             sourceMaterialId: card.sourceMaterialId ?? null,
             createdAt: now,
-          })),
+          }))
         )
         .run();
     }
 
     if (content.quizQuestions.length) {
-      tx.insert(quizQuestions)
+      tx
+        .insert(quizQuestions)
         .values(
           content.quizQuestions.map((question) => ({
             moduleId,
@@ -545,7 +559,7 @@ export async function replaceGeneratedStudyContent(
             correctOptionId: question.correctOptionId,
             explanation: question.explanation ?? null,
             createdAt: now,
-          })),
+          }))
         )
         .run();
     }
@@ -585,7 +599,7 @@ export async function createManualFlashcard(
     prompt: string;
     answer: string;
     explanation?: string | null;
-  },
+  }
 ) {
   const result = db
     .insert(flashcards)
@@ -602,13 +616,15 @@ export async function createManualFlashcard(
   return db
     .select()
     .from(flashcards)
-    .where(eq(flashcards.id, Number(result.lastInsertRowid)))
+    .where(
+      eq(flashcards.id, Number(result.lastInsertRowid))
+    )
     .get();
 }
 
 export async function getFlashcardForUser(
   flashcardId: number,
-  userId: number,
+  userId: number
 ) {
   return db
     .select({ card: flashcards })
@@ -617,8 +633,8 @@ export async function getFlashcardForUser(
     .where(
       and(
         eq(flashcards.id, flashcardId),
-        eq(modules.userId, userId),
-      ),
+        eq(modules.userId, userId)
+      )
     )
     .get()?.card;
 }
@@ -630,15 +646,19 @@ export async function updateManualFlashcardForUser(
     prompt: string;
     answer: string;
     explanation?: string | null;
-  },
+  }
 ) {
-  const card = await getFlashcardForUser(flashcardId, userId);
+  const card = await getFlashcardForUser(
+    flashcardId,
+    userId
+  );
 
   if (!card || card.isGenerated) {
     return undefined;
   }
 
-  db.update(flashcards)
+  db
+    .update(flashcards)
     .set({
       prompt: input.prompt,
       answer: input.answer,
@@ -656,16 +676,138 @@ export async function updateManualFlashcardForUser(
 
 export async function deleteManualFlashcardForUser(
   flashcardId: number,
-  userId: number,
+  userId: number
 ) {
-  const card = await getFlashcardForUser(flashcardId, userId);
+  const card = await getFlashcardForUser(
+    flashcardId,
+    userId
+  );
 
   if (!card || card.isGenerated) {
     return false;
   }
 
-  db.delete(flashcards)
+  db
+    .delete(flashcards)
     .where(eq(flashcards.id, card.id))
+    .run();
+
+  return true;
+}
+
+export async function createManualQuizQuestion(
+  moduleId: number,
+  input: {
+    prompt: string;
+    options: Array<{
+      id: string;
+      text: string;
+    }>;
+    correctOptionId: string;
+    explanation?: string | null;
+  }
+) {
+  const result = db
+    .insert(quizQuestions)
+    .values({
+      moduleId,
+      prompt: input.prompt,
+      optionsJson: JSON.stringify(input.options),
+      correctOptionId: input.correctOptionId,
+      explanation: input.explanation ?? null,
+      isGenerated: false,
+      createdAt: new Date(),
+    })
+    .run();
+
+  return db
+    .select()
+    .from(quizQuestions)
+    .where(
+      eq(
+        quizQuestions.id,
+        Number(result.lastInsertRowid)
+      )
+    )
+    .get();
+}
+
+export async function getQuizQuestionForUser(
+  questionId: number,
+  userId: number
+) {
+  return db
+    .select({ question: quizQuestions })
+    .from(quizQuestions)
+    .innerJoin(
+      modules,
+      eq(quizQuestions.moduleId, modules.id)
+    )
+    .where(
+      and(
+        eq(quizQuestions.id, questionId),
+        eq(modules.userId, userId)
+      )
+    )
+    .get()?.question;
+}
+
+export async function updateManualQuizQuestionForUser(
+  questionId: number,
+  userId: number,
+  input: {
+    prompt: string;
+    options: Array<{
+      id: string;
+      text: string;
+    }>;
+    correctOptionId: string;
+    explanation?: string | null;
+  }
+) {
+  const question = await getQuizQuestionForUser(
+    questionId,
+    userId
+  );
+
+  if (!question || question.isGenerated) {
+    return undefined;
+  }
+
+  db
+    .update(quizQuestions)
+    .set({
+      prompt: input.prompt,
+      optionsJson: JSON.stringify(input.options),
+      correctOptionId: input.correctOptionId,
+      explanation: input.explanation ?? null,
+    })
+    .where(eq(quizQuestions.id, question.id))
+    .run();
+
+  return db
+    .select()
+    .from(quizQuestions)
+    .where(eq(quizQuestions.id, question.id))
+    .get();
+}
+
+export async function deleteManualQuizQuestionForUser(
+  questionId: number,
+  userId: number
+) {
+  const question = await getQuizQuestionForUser(
+    questionId,
+    userId
+  );
+
+  if (!question || question.isGenerated) {
+    return false;
+  }
+
+  db
+    .delete(quizQuestions)
+    .where(eq(quizQuestions.id, question.id))
     .run();
 
   return true;
@@ -673,7 +815,7 @@ export async function deleteManualFlashcardForUser(
 
 export async function exportModuleBackupForUser(
   moduleId: number,
-  userId: number,
+  userId: number
 ) {
   const module = await getModuleForUser(moduleId, userId);
 
@@ -713,7 +855,7 @@ export async function exportModuleBackupForUser(
 
 export async function restoreModuleBackupForUser(
   userId: number,
-  backup: ModuleBackup,
+  backup: ModuleBackup
 ) {
   const now = new Date();
   let moduleId = 0;
@@ -733,18 +875,22 @@ export async function restoreModuleBackupForUser(
     moduleId = Number(result.lastInsertRowid);
 
     if (backup.guide) {
-      tx.insert(moduleGuides)
+      tx
+        .insert(moduleGuides)
         .values({
           moduleId,
           summary: backup.guide.summary,
-          conceptsJson: JSON.stringify(backup.guide.concepts),
+          conceptsJson: JSON.stringify(
+            backup.guide.concepts
+          ),
           updatedAt: now,
         })
         .run();
     }
 
     if (backup.flashcards.length) {
-      tx.insert(flashcards)
+      tx
+        .insert(flashcards)
         .values(
           backup.flashcards.map((card) => ({
             moduleId,
@@ -753,23 +899,26 @@ export async function restoreModuleBackupForUser(
             explanation: card.explanation ?? null,
             isGenerated: true,
             createdAt: now,
-          })),
+          }))
         )
         .run();
     }
 
     if (backup.quizQuestions.length) {
-      tx.insert(quizQuestions)
+      tx
+        .insert(quizQuestions)
         .values(
           backup.quizQuestions.map((question) => ({
             moduleId,
             prompt: question.prompt,
-            optionsJson: JSON.stringify(question.options),
+            optionsJson: JSON.stringify(
+              question.options
+            ),
             correctOptionId: question.correctOptionId,
             explanation: question.explanation ?? null,
             isGenerated: true,
             createdAt: now,
-          })),
+          }))
         )
         .run();
     }
@@ -781,7 +930,7 @@ export async function restoreModuleBackupForUser(
 export async function listDueFlashcards(
   userId: number,
   moduleId: number,
-  now = new Date(),
+  now = new Date()
 ) {
   return db
     .select({
@@ -792,9 +941,12 @@ export async function listDueFlashcards(
     .leftJoin(
       cardReviewStates,
       and(
-        eq(cardReviewStates.flashcardId, flashcards.id),
-        eq(cardReviewStates.userId, userId),
-      ),
+        eq(
+          cardReviewStates.flashcardId,
+          flashcards.id
+        ),
+        eq(cardReviewStates.userId, userId)
+      )
     )
     .where(
       and(
@@ -803,10 +955,10 @@ export async function listDueFlashcards(
           lte(cardReviewStates.dueAt, now),
           eq(
             cardReviewStates.id,
-            null as unknown as number,
-          ),
-        ),
-      ),
+            null as unknown as number
+          )
+        )
+      )
     )
     .all();
 }
@@ -831,14 +983,18 @@ export async function recordReview(input: {
     .where(
       and(
         eq(cardReviewStates.userId, input.userId),
-        eq(cardReviewStates.flashcardId, input.flashcardId),
-      ),
+        eq(
+          cardReviewStates.flashcardId,
+          input.flashcardId
+        )
+      )
     )
     .get();
 
   db.transaction((tx) => {
     if (existing) {
-      tx.update(cardReviewStates)
+      tx
+        .update(cardReviewStates)
         .set({
           repetitions: input.repetitions,
           intervalDays: input.intervalDays,
@@ -849,7 +1005,8 @@ export async function recordReview(input: {
         .where(eq(cardReviewStates.id, existing.id))
         .run();
     } else {
-      tx.insert(cardReviewStates)
+      tx
+        .insert(cardReviewStates)
         .values({
           userId: input.userId,
           flashcardId: input.flashcardId,
@@ -862,7 +1019,8 @@ export async function recordReview(input: {
         .run();
     }
 
-    tx.insert(reviewEvents)
+    tx
+      .insert(reviewEvents)
       .values({
         userId: input.userId,
         moduleId: input.moduleId,
@@ -879,7 +1037,7 @@ export async function recordReview(input: {
 
 export async function createQuizSession(
   userId: number,
-  moduleId: number,
+  moduleId: number
 ) {
   const result = db
     .insert(studySessions)
@@ -894,13 +1052,18 @@ export async function createQuizSession(
   return db
     .select()
     .from(studySessions)
-    .where(eq(studySessions.id, Number(result.lastInsertRowid)))
+    .where(
+      eq(
+        studySessions.id,
+        Number(result.lastInsertRowid)
+      )
+    )
     .get();
 }
 
 export async function createFocusSession(
   userId: number,
-  moduleId: number,
+  moduleId: number
 ) {
   const result = db
     .insert(studySessions)
@@ -916,13 +1079,18 @@ export async function createFocusSession(
   return db
     .select()
     .from(studySessions)
-    .where(eq(studySessions.id, Number(result.lastInsertRowid)))
+    .where(
+      eq(
+        studySessions.id,
+        Number(result.lastInsertRowid)
+      )
+    )
     .get();
 }
 
 export async function finishFocusSession(
   userId: number,
-  sessionId: number,
+  sessionId: number
 ) {
   const session = db
     .select()
@@ -931,8 +1099,8 @@ export async function finishFocusSession(
       and(
         eq(studySessions.id, sessionId),
         eq(studySessions.userId, userId),
-        eq(studySessions.kind, "focus"),
-      ),
+        eq(studySessions.kind, "focus")
+      )
     )
     .get();
 
@@ -940,16 +1108,18 @@ export async function finishFocusSession(
     return undefined;
   }
 
-  const { elapsedFocusSeconds } =
-    await import("../lib/focusSessions");
+  const { elapsedFocusSeconds } = await import(
+    "../lib/focusSessions"
+  );
 
   const endedAt = new Date();
   const durationSeconds = elapsedFocusSeconds(
     session.startedAt,
-    endedAt,
+    endedAt
   );
 
-  db.update(studySessions)
+  db
+    .update(studySessions)
     .set({
       endedAt,
       durationSeconds,
@@ -976,8 +1146,8 @@ export async function recordQuizResponse(input: {
     .where(
       and(
         eq(studySessions.id, input.sessionId),
-        eq(studySessions.userId, input.userId),
-      ),
+        eq(studySessions.userId, input.userId)
+      )
     )
     .get();
 
@@ -991,8 +1161,11 @@ export async function recordQuizResponse(input: {
     .where(
       and(
         eq(quizQuestions.id, input.questionId),
-        eq(quizQuestions.moduleId, session.moduleId),
-      ),
+        eq(
+          quizQuestions.moduleId,
+          session.moduleId
+        )
+      )
     )
     .get();
 
@@ -1004,7 +1177,8 @@ export async function recordQuizResponse(input: {
     question.correctOptionId === input.selectedOptionId;
 
   db.transaction((tx) => {
-    tx.insert(quizResponses)
+    tx
+      .insert(quizResponses)
       .values({
         sessionId: session.id,
         questionId: question.id,
@@ -1015,7 +1189,8 @@ export async function recordQuizResponse(input: {
       })
       .run();
 
-    tx.update(studySessions)
+    tx
+      .update(studySessions)
       .set({
         answerCount: session.answerCount + 1,
         correctCount:
@@ -1034,7 +1209,7 @@ export async function recordQuizResponse(input: {
 
 export async function listTutorMessages(
   moduleId: number,
-  userId: number,
+  userId: number
 ) {
   return db
     .select()
@@ -1042,8 +1217,8 @@ export async function listTutorMessages(
     .where(
       and(
         eq(tutorMessages.moduleId, moduleId),
-        eq(tutorMessages.userId, userId),
-      ),
+        eq(tutorMessages.userId, userId)
+      )
     )
     .orderBy(tutorMessages.createdAt)
     .all();
@@ -1070,7 +1245,12 @@ export async function addTutorMessage(input: {
   return db
     .select()
     .from(tutorMessages)
-    .where(eq(tutorMessages.id, Number(result.lastInsertRowid)))
+    .where(
+      eq(
+        tutorMessages.id,
+        Number(result.lastInsertRowid)
+      )
+    )
     .get();
 }
 
@@ -1098,7 +1278,12 @@ export async function getPreferences(userId: number) {
   return db
     .select()
     .from(studyPreferences)
-    .where(eq(studyPreferences.id, Number(result.lastInsertRowid)))
+    .where(
+      eq(
+        studyPreferences.id,
+        Number(result.lastInsertRowid)
+      )
+    )
     .get();
 }
 
@@ -1107,11 +1292,12 @@ export async function updatePreferences(
   input: {
     dailyGoalMinutes: number;
     preferredSessionMinutes: number;
-  },
+  }
 ) {
   await getPreferences(userId);
 
-  db.update(studyPreferences)
+  db
+    .update(studyPreferences)
     .set({
       ...input,
       updatedAt: new Date(),
@@ -1146,7 +1332,10 @@ export async function getAnalyticsData(userId: number) {
   const tasks = db
     .select({ task: moduleTasks })
     .from(moduleTasks)
-    .innerJoin(modules, eq(moduleTasks.moduleId, modules.id))
+    .innerJoin(
+      modules,
+      eq(moduleTasks.moduleId, modules.id)
+    )
     .where(eq(modules.userId, userId))
     .all()
     .map((row) => row.task);
@@ -1162,17 +1351,21 @@ export async function getAnalyticsData(userId: number) {
 
 export async function searchStudyContentForUser(
   userId: number,
-  query: string,
+  query: string
 ) {
   const ownedModules = await listModulesForUser(userId);
+
   const byId = new Map(
-    ownedModules.map((module) => [module.id, module]),
+    ownedModules.map((module) => [module.id, module])
   );
 
   const notes = db
     .select({ note: moduleNotes })
     .from(moduleNotes)
-    .innerJoin(modules, eq(moduleNotes.moduleId, modules.id))
+    .innerJoin(
+      modules,
+      eq(moduleNotes.moduleId, modules.id)
+    )
     .where(eq(modules.userId, userId))
     .all()
     .map((row) => row.note);
@@ -1180,7 +1373,10 @@ export async function searchStudyContentForUser(
   const tasks = db
     .select({ task: moduleTasks })
     .from(moduleTasks)
-    .innerJoin(modules, eq(moduleTasks.moduleId, modules.id))
+    .innerJoin(
+      modules,
+      eq(moduleTasks.moduleId, modules.id)
+    )
     .where(eq(modules.userId, userId))
     .all()
     .map((row) => row.task);
@@ -1188,12 +1384,15 @@ export async function searchStudyContentForUser(
   const readyMaterials = db
     .select({ material: materials })
     .from(materials)
-    .innerJoin(modules, eq(materials.moduleId, modules.id))
+    .innerJoin(
+      modules,
+      eq(materials.moduleId, modules.id)
+    )
     .where(
       and(
         eq(modules.userId, userId),
-        eq(materials.extractionStatus, "ready"),
-      ),
+        eq(materials.extractionStatus, "ready")
+      )
     )
     .all()
     .map((row) => row.material);
@@ -1206,6 +1405,7 @@ export async function searchStudyContentForUser(
       title: module.title,
       content: module.description ?? "",
     })),
+
     ...notes.map((note) => ({
       type: "note" as const,
       moduleId: note.moduleId,
@@ -1214,14 +1414,18 @@ export async function searchStudyContentForUser(
       title: note.title,
       content: note.body,
     })),
+
     ...tasks.map((task) => ({
       type: "task" as const,
       moduleId: task.moduleId,
       moduleTitle:
         byId.get(task.moduleId)?.title ?? "Module",
       title: task.title,
-      content: task.dueDate ? `Due ${task.dueDate}` : "",
+      content: task.dueDate
+        ? `Due ${task.dueDate}`
+        : "",
     })),
+
     ...readyMaterials.map((material) => ({
       type: "material" as const,
       moduleId: material.moduleId,

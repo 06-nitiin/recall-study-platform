@@ -28,3 +28,10 @@ export const flashcardSchema = z.object({
   answer: z.string().trim().min(1, "A flashcard answer is required.").max(8_000),
   explanation: z.string().trim().max(8_000).nullable().optional(),
 });
+
+export const manualQuizQuestionSchema = z.object({
+  prompt: z.string().trim().min(1, "A quiz question is required.").max(2_000),
+  options: z.array(z.object({ id: z.string().trim().min(1).max(80), text: z.string().trim().min(1, "Each option needs text.").max(2_000) })).min(2).max(6),
+  correctOptionId: z.string().trim().min(1).max(80),
+  explanation: z.string().trim().max(8_000).nullable().optional(),
+}).superRefine((question, context) => { if (!question.options.some((option) => option.id === question.correctOptionId)) context.addIssue({ code: "custom", message: "Choose one of the listed options as correct.", path: ["correctOptionId"] }); });
