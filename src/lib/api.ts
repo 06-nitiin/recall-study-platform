@@ -49,6 +49,15 @@ export type ModuleTask = {
   updatedAt: string;
 };
 
+export type StudySearchResult = {
+  type: "module" | "note" | "task" | "material";
+  moduleId: number;
+  moduleTitle: string;
+  title: string;
+  content: string;
+  excerpt: string;
+};
+
 async function request<T>(path: string, options: RequestInit = {}) {
   const response = await fetch(path, {
     credentials: "include",
@@ -70,7 +79,8 @@ async function request<T>(path: string, options: RequestInit = {}) {
   return payload;
 }
 
-export const getHealthStatus = () => request<HealthStatus>("/api/health");
+export const getHealthStatus = () =>
+  request<HealthStatus>("/api/health");
 
 export const getCurrentUser = () =>
   request<{ user: CurrentUser }>("/api/auth/me");
@@ -140,7 +150,10 @@ export const listMaterials = (moduleId: number) =>
     `/api/modules/${moduleId}/materials`,
   );
 
-export const uploadMaterial = async (moduleId: number, file: File) => {
+export const uploadMaterial = async (
+  moduleId: number,
+  file: File,
+) => {
   const response = await fetch(
     `/api/modules/${moduleId}/materials/upload`,
     {
@@ -149,7 +162,9 @@ export const uploadMaterial = async (moduleId: number, file: File) => {
       headers: {
         "Content-Type":
           file.type ||
-          (file.name.endsWith(".md") ? "text/markdown" : "text/plain"),
+          (file.name.endsWith(".md")
+            ? "text/markdown"
+            : "text/plain"),
         "x-material-filename": encodeURIComponent(file.name),
       },
       body: file,
@@ -386,7 +401,9 @@ export const restoreModuleBackup = (backup: unknown) =>
   });
 
 export const listNotes = (moduleId: number) =>
-  request<{ notes: ModuleNote[] }>(`/api/modules/${moduleId}/notes`);
+  request<{ notes: ModuleNote[] }>(
+    `/api/modules/${moduleId}/notes`,
+  );
 
 export const createNote = (
   moduleId: number,
@@ -395,10 +412,13 @@ export const createNote = (
     body: string;
   },
 ) =>
-  request<{ note: ModuleNote }>(`/api/modules/${moduleId}/notes`, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
+  request<{ note: ModuleNote }>(
+    `/api/modules/${moduleId}/notes`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
 
 export const updateNote = (
   noteId: number,
@@ -407,16 +427,22 @@ export const updateNote = (
     body: string;
   },
 ) =>
-  request<{ note: ModuleNote }>(`/api/modules/notes/${noteId}`, {
-    method: "PATCH",
-    body: JSON.stringify(input),
-  });
+  request<{ note: ModuleNote }>(
+    `/api/modules/notes/${noteId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    },
+  );
 
 export const deleteNote = async (noteId: number) => {
-  const response = await fetch(`/api/modules/notes/${noteId}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
+  const response = await fetch(
+    `/api/modules/notes/${noteId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
 
   if (!response.ok) {
     throw new Error("Could not delete this note.");
@@ -424,7 +450,9 @@ export const deleteNote = async (noteId: number) => {
 };
 
 export const listTasks = (moduleId: number) =>
-  request<{ tasks: ModuleTask[] }>(`/api/modules/${moduleId}/tasks`);
+  request<{ tasks: ModuleTask[] }>(
+    `/api/modules/${moduleId}/tasks`,
+  );
 
 export const createTask = (
   moduleId: number,
@@ -433,10 +461,13 @@ export const createTask = (
     dueDate: string | null;
   },
 ) =>
-  request<{ task: ModuleTask }>(`/api/modules/${moduleId}/tasks`, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
+  request<{ task: ModuleTask }>(
+    `/api/modules/${moduleId}/tasks`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
 
 export const setTaskComplete = (
   taskId: number,
@@ -451,12 +482,20 @@ export const setTaskComplete = (
   );
 
 export const deleteTask = async (taskId: number) => {
-  const response = await fetch(`/api/modules/tasks/${taskId}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
+  const response = await fetch(
+    `/api/modules/tasks/${taskId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
 
   if (!response.ok) {
     throw new Error("Could not delete this task.");
   }
 };
+
+export const searchStudy = (query: string) =>
+  request<{ results: StudySearchResult[] }>(
+    `/api/search?q=${encodeURIComponent(query)}`,
+  );

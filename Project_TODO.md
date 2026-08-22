@@ -19,3 +19,16 @@
 - [x] Add a private, versioned module backup export and validated module restore workflow.
 - [x] Add protected backup/restore API coverage, accessible import/export interface, and update standalone documentation.
 - [x] Deliver the Standalone Milestone 5 source files, validation commands, and Git commit guide.
+- [x] Add protected focus-session timer logging with reliable elapsed-time persistence.
+- [x] Show user-owned focus activity in progress analytics and add focused-session tests and documentation.
+- [x] Deliver the Standalone Milestone 6 source files, migration, validation commands, and Git commit guide.
+- [x] Fix the analytics streak calculation and test so date grouping is stable across local timezones.
+- [x] Add private module study notes with owner-scoped creation, editing, and deletion.
+- [x] Add protected note-management tests, accessible notes UI, migration, and documentation.
+- [x] Deliver the Standalone Milestone 7 source files, migration, validation commands, and Git commit guide.
+- [x] Add private module study tasks with due dates, completion status, and owner-scoped management.
+- [x] Add protected task-management tests, accessible task UI, migration, progress metrics, and documentation.
+- [x] Deliver the Standalone Milestone 8 source files, migration, validation commands, and Git commit guide.
+- [x] Add owner-scoped cross-module search across modules, private notes, tasks, and extracted materials.
+- [x] Add search ranking tests, accessible search UI, protected API coverage, and documentation.
+- [x] Deliver the Standalone Milestone 9 source files, validation commands, and Git commit guide.

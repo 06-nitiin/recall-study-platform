@@ -41,6 +41,22 @@ Create a module, upload a `.txt` or `.md` material, and run extraction. Once at 
 
 The progress panel displays only records already created by the signed-in user: cards due, retention from review quality, a review heatmap, a consecutive-review streak, and per-module activity. A user can choose daily and preferred-session minute targets; these settings are persisted privately.
 
+## Focus sessions
+
+Open a module and use **Start focus** to begin a focused study timer. The browser displays the live elapsed time, but the completed duration is calculated from the API’s start and finish timestamps before it is saved. Finished focus time appears in the **Focus today** metric. A focus session belongs only to the signed-in user and selected module.
+
+## Private study notes
+
+Each open module has a **Study notes** area for concise personal notes, questions, and reminders. Notes can be created, edited, and deleted by the signed-in owner of that module only. These notes are stored separately from uploaded materials and are not sent to the AI generator or tutor.
+
+## Module study tasks
+
+Each module also has a private task checklist. A task can have an optional due date and can be marked complete or incomplete without being deleted. The progress summary reports the total number of open tasks across the signed-in user’s modules. Tasks are owner-scoped and no task data is shared with the AI features.
+
+## Private study search
+
+Use the search field at the top of the workspace to search across your own module titles, notes, tasks, and ready extracted materials. Search results identify their content type and module. Choosing a result opens its owning module. The search API only collects data belonging to the signed-in user.
+
 ## Portable module backup and restore
 
 With a module open, choose **Export module** to download a versioned JSON backup containing that module’s title, description, study guide, flashcards, and quiz questions. The backup deliberately excludes uploaded source files, extracted material text, tutor chat, review history, sessions, preferences, and account information.

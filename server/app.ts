@@ -9,6 +9,7 @@ import { analyticsRouter } from "./routes/analytics";
 import { authRouter } from "./routes/auth";
 import { materialsRouter } from "./routes/materials";
 import { modulesRouter } from "./routes/modules";
+import { searchRouter } from "./routes/search";
 import { studyRouter } from "./routes/study";
 
 export function createApp() {
@@ -18,27 +19,15 @@ export function createApp() {
 
   app.use(
     cors({
-      origin:
-        process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
+      origin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
       credentials: true,
     }),
   );
 
   app.use((_request, response, next) => {
-    response.setHeader(
-      "X-Content-Type-Options",
-      "nosniff",
-    );
-
-    response.setHeader(
-      "Referrer-Policy",
-      "same-origin",
-    );
-
-    response.setHeader(
-      "Cross-Origin-Resource-Policy",
-      "same-site",
-    );
+    response.setHeader("X-Content-Type-Options", "nosniff");
+    response.setHeader("Referrer-Policy", "same-origin");
+    response.setHeader("Cross-Origin-Resource-Policy", "same-site");
 
     next();
   });
@@ -60,12 +49,13 @@ export function createApp() {
   app.use("/api", materialsRouter);
   app.use("/api", studyRouter);
   app.use("/api", analyticsRouter);
+  app.use("/api", searchRouter);
 
-  app.use((_request, response) =>
+  app.use((_request, response) => {
     response.status(404).json({
       error: "API route not found.",
-    }),
-  );
+    });
+  });
 
   app.use(
     (
@@ -76,9 +66,7 @@ export function createApp() {
     ) => {
       if (error instanceof ZodError) {
         return response.status(400).json({
-          error:
-            error.issues[0]?.message ??
-            "Invalid request.",
+          error: error.issues[0]?.message ?? "Invalid request.",
         });
       }
 

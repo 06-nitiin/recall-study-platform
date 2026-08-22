@@ -21,6 +21,7 @@ import { MaterialPanel } from "./MaterialPanel";
 import { ModuleBackupPanel } from "./ModuleBackupPanel";
 import { NotesPanel } from "./NotesPanel";
 import { ProgressPanel } from "./ProgressPanel";
+import { SearchPanel } from "./SearchPanel";
 import { StudyPanel } from "./StudyPanel";
 import { TasksPanel } from "./TasksPanel";
 
@@ -34,12 +35,10 @@ export function ModuleDashboard({
   const [modules, setModules] = useState<StudyModule[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [draft, setDraft] = useState({
     title: "",
     description: "",
   });
-
   const [editing, setEditing] = useState<StudyModule | null>(null);
   const [selectedModule, setSelectedModule] =
     useState<StudyModule | null>(null);
@@ -77,7 +76,6 @@ export function ModuleDashboard({
         title: "",
         description: "",
       });
-
       setEditing(null);
       await refresh();
     } catch (reason) {
@@ -124,8 +122,8 @@ export function ModuleDashboard({
           </h1>
 
           <p className="mt-3 max-w-xl leading-7 text-slate-600">
-            Create a module for each course or subject, then attach
-            private source notes.
+            Create a module for each course or subject, then attach private
+            source notes.
           </p>
         </div>
 
@@ -140,6 +138,11 @@ export function ModuleDashboard({
           Sign out
         </button>
       </header>
+
+      <SearchPanel
+        modules={modules}
+        onOpenModule={setSelectedModule}
+      />
 
       <section className="mx-auto mt-10 grid max-w-6xl gap-6 lg:grid-cols-[.8fr_1.2fr]">
         <form
@@ -254,8 +257,7 @@ export function ModuleDashboard({
                     </p>
 
                     <p className="mt-1 text-sm leading-6 text-slate-600">
-                      {module.description ||
-                        "No description yet."}
+                      {module.description || "No description yet."}
                     </p>
                   </div>
 
