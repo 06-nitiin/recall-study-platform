@@ -130,3 +130,12 @@ export const studyPreferences = sqliteTable("study_preferences", {
   preferredSessionMinutes: integer("preferred_session_minutes").notNull().default(15),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
+
+export const moduleNotes = sqliteTable("module_notes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  moduleId: integer("module_id").notNull().references(() => modules.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});

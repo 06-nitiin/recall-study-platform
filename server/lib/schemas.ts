@@ -12,3 +12,8 @@ export const moduleSchema = z.object({
   title: z.string().trim().min(1, "A module title is required.").max(160),
   description: z.string().trim().max(1_000).nullable().optional(),
 });
+
+export const noteSchema = z.object({
+  title: z.string().trim().min(1, "A note title is required.").max(160),
+  body: z.string().trim().min(1, "Write something before saving the note.").max(20_000),
+});

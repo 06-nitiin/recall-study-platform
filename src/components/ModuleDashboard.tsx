@@ -7,6 +7,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
+
 import {
   createModule,
   deleteModule,
@@ -16,9 +17,11 @@ import {
   type CurrentUser,
   type StudyModule,
 } from "../lib/api";
+
 import { FocusTimer } from "./FocusTimer";
 import { MaterialPanel } from "./MaterialPanel";
 import { ModuleBackupPanel } from "./ModuleBackupPanel";
+import { NotesPanel } from "./NotesPanel";
 import { ProgressPanel } from "./ProgressPanel";
 import { StudyPanel } from "./StudyPanel";
 
@@ -77,6 +80,7 @@ export function ModuleDashboard({
       });
 
       setEditing(null);
+
       await refresh();
     } catch (reason) {
       setError(
@@ -89,6 +93,7 @@ export function ModuleDashboard({
 
   const edit = (module: StudyModule) => {
     setEditing(module);
+
     setDraft({
       title: module.title,
       description: module.description ?? "",
@@ -146,6 +151,7 @@ export function ModuleDashboard({
         >
           <div className="flex items-center gap-2 text-emerald-300">
             <BookPlus className="size-5" />
+
             <span className="text-sm font-semibold">
               {editing ? "Edit module" : "New module"}
             </span>
@@ -187,6 +193,7 @@ export function ModuleDashboard({
 
           <button className="mt-5 flex items-center gap-2 rounded-xl bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-950">
             <Plus className="size-4" />
+
             {editing ? "Save changes" : "Create module"}
           </button>
 
@@ -236,8 +243,8 @@ export function ModuleDashboard({
             </p>
           ) : modules.length === 0 ? (
             <p className="mt-7 rounded-xl bg-slate-50 p-5 leading-7 text-slate-600">
-              No modules yet. Create your first course or subject
-              on the left.
+              No modules yet. Create your first course or subject on
+              the left.
             </p>
           ) : (
             <ul className="mt-6 divide-y divide-slate-100">
@@ -292,7 +299,11 @@ export function ModuleDashboard({
       {selectedModule && (
         <div className="mx-auto max-w-6xl">
           <MaterialPanel module={selectedModule} />
+
           <StudyPanel module={selectedModule} />
+
+          <NotesPanel module={selectedModule} />
+
           <FocusTimer module={selectedModule} />
 
           <ModuleBackupPanel

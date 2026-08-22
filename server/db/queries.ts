@@ -1,5 +1,5 @@
 import { and, desc, eq, lte, or } from "drizzle-orm";
-import { cardReviewStates, flashcards, materials, moduleGuides, modules, quizQuestions, quizResponses, reviewEvents, studyPreferences, studySessions, tutorMessages, users } from "../../drizzle/schema";
+import { cardReviewStates, flashcards, materials, moduleGuides, moduleNotes, modules, quizQuestions, quizResponses, reviewEvents, studyPreferences, studySessions, tutorMessages, users } from "../../drizzle/schema";
 import { db } from "./client";
 import { createModuleBackup, type ModuleBackup } from "../lib/backup";
 
@@ -39,6 +39,12 @@ export async function updateModuleForUser(moduleId: number, userId: number, inpu
 export async function deleteModuleForUser(moduleId: number, userId: number) {
   return db.delete(modules).where(and(eq(modules.id, moduleId), eq(modules.userId, userId))).run().changes > 0;
 }
+
+export async function listNotesForModuleUser(moduleId: number, userId: number) { return db.select({ note: moduleNotes }).from(moduleNotes).innerJoin(modules, eq(moduleNotes.moduleId, modules.id)).where(and(eq(moduleNotes.moduleId, moduleId), eq(modules.userId, userId))).orderBy(desc(moduleNotes.updatedAt)).all().map((row) => row.note); }
+export async function createNoteForModule(moduleId: number, input: { title: string; body: string }) { const now = new Date(); const result = db.insert(moduleNotes).values({ moduleId, ...input, createdAt: now, updatedAt: now }).run(); return db.select().from(moduleNotes).where(eq(moduleNotes.id, Number(result.lastInsertRowid))).get(); }
+export async function getNoteForUser(noteId: number, userId: number) { return db.select({ note: moduleNotes }).from(moduleNotes).innerJoin(modules, eq(moduleNotes.moduleId, modules.id)).where(and(eq(moduleNotes.id, noteId), eq(modules.userId, userId))).get()?.note; }
+export async function updateNoteForUser(noteId: number, userId: number, input: { title: string; body: string }) { const note = await getNoteForUser(noteId, userId); if (!note) return undefined; db.update(moduleNotes).set({ ...input, updatedAt: new Date() }).where(eq(moduleNotes.id, note.id)).run(); return db.select().from(moduleNotes).where(eq(moduleNotes.id, note.id)).get(); }
+export async function deleteNoteForUser(noteId: number, userId: number) { const note = await getNoteForUser(noteId, userId); if (!note) return false; db.delete(moduleNotes).where(eq(moduleNotes.id, note.id)).run(); return true; }
 
 export async function listMaterialsForModule(moduleId: number) {
   return db.select().from(materials).where(eq(materials.moduleId, moduleId)).orderBy(desc(materials.createdAt)).all();

@@ -30,6 +30,15 @@ export type StudyMaterial = {
   updatedAt: string;
 };
 
+export type ModuleNote = {
+  id: number;
+  moduleId: number;
+  title: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 async function request<T>(
   path: string,
   options: RequestInit = {},
@@ -376,3 +385,52 @@ export const restoreModuleBackup = (backup: unknown) =>
     method: "POST",
     body: JSON.stringify(backup),
   });
+
+export const listNotes = (moduleId: number) =>
+  request<{ notes: ModuleNote[] }>(
+    `/api/modules/${moduleId}/notes`,
+  );
+
+export const createNote = (
+  moduleId: number,
+  input: {
+    title: string;
+    body: string;
+  },
+) =>
+  request<{ note: ModuleNote }>(
+    `/api/modules/${moduleId}/notes`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
+
+export const updateNote = (
+  noteId: number,
+  input: {
+    title: string;
+    body: string;
+  },
+) =>
+  request<{ note: ModuleNote }>(
+    `/api/modules/notes/${noteId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    },
+  );
+
+export const deleteNote = async (noteId: number) => {
+  const response = await fetch(
+    `/api/modules/notes/${noteId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not delete this note.");
+  }
+};

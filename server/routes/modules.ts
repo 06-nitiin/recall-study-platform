@@ -2,15 +2,20 @@ import { Router } from "express";
 
 import {
   createModuleForUser,
+  createNoteForModule,
   deleteModuleForUser,
+  deleteNoteForUser,
   exportModuleBackupForUser,
   getModuleForUser,
   listModulesForUser,
+  listNotesForModuleUser,
   restoreModuleBackupForUser,
   updateModuleForUser,
+  updateNoteForUser,
 } from "../db/queries";
+
 import { moduleBackupSchema } from "../lib/backup";
-import { moduleSchema } from "../lib/schemas";
+import { moduleSchema, noteSchema } from "../lib/schemas";
 import { requireUser } from "../middleware/requireUser";
 
 export const modulesRouter = Router();
@@ -40,18 +45,21 @@ modulesRouter.post("/", async (request, response, next) => {
   }
 });
 
-modulesRouter.post("/restore", async (request, response, next) => {
-  try {
-    response.status(201).json({
-      module: await restoreModuleBackupForUser(
-        request.user!.id,
-        moduleBackupSchema.parse(request.body),
-      ),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+modulesRouter.post(
+  "/restore",
+  async (request, response, next) => {
+    try {
+      response.status(201).json({
+        module: await restoreModuleBackupForUser(
+          request.user!.id,
+          moduleBackupSchema.parse(request.body),
+        ),
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 modulesRouter.get(
   "/:moduleId/backup",
@@ -80,24 +88,126 @@ modulesRouter.get(
   },
 );
 
-modulesRouter.get("/:moduleId", async (request, response, next) => {
-  try {
-    const module = await getModuleForUser(
-      Number(request.params.moduleId),
-      request.user!.id,
-    );
+modulesRouter.get(
+  "/:moduleId/notes",
+  async (request, response, next) => {
+    try {
+      const module = await getModuleForUser(
+        Number(request.params.moduleId),
+        request.user!.id,
+      );
 
-    if (!module) {
-      return response.status(404).json({
-        error: "Module not found.",
+      if (!module) {
+        return response.status(404).json({
+          error: "Module not found.",
+        });
+      }
+
+      response.json({
+        notes: await listNotesForModuleUser(
+          module.id,
+          request.user!.id,
+        ),
       });
+    } catch (error) {
+      next(error);
     }
+  },
+);
 
-    response.json({ module });
-  } catch (error) {
-    next(error);
-  }
-});
+modulesRouter.post(
+  "/:moduleId/notes",
+  async (request, response, next) => {
+    try {
+      const module = await getModuleForUser(
+        Number(request.params.moduleId),
+        request.user!.id,
+      );
+
+      if (!module) {
+        return response.status(404).json({
+          error: "Module not found.",
+        });
+      }
+
+      response.status(201).json({
+        note: await createNoteForModule(
+          module.id,
+          noteSchema.parse(request.body),
+        ),
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+modulesRouter.patch(
+  "/notes/:noteId",
+  async (request, response, next) => {
+    try {
+      const note = await updateNoteForUser(
+        Number(request.params.noteId),
+        request.user!.id,
+        noteSchema.parse(request.body),
+      );
+
+      if (!note) {
+        return response.status(404).json({
+          error: "Note not found.",
+        });
+      }
+
+      response.json({ note });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+modulesRouter.delete(
+  "/notes/:noteId",
+  async (request, response, next) => {
+    try {
+      const deleted = await deleteNoteForUser(
+        Number(request.params.noteId),
+        request.user!.id,
+      );
+
+      if (!deleted) {
+        return response.status(404).json({
+          error: "Note not found.",
+        });
+      }
+
+      response.status(204).end();
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+modulesRouter.get(
+  "/:moduleId",
+  async (request, response, next) => {
+    try {
+      const module = await getModuleForUser(
+        Number(request.params.moduleId),
+        request.user!.id,
+      );
+
+      if (!module) {
+        return response.status(404).json({
+          error: "Module not found.",
+        });
+      }
+
+      response.json({ module });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 modulesRouter.patch(
   "/:moduleId",
