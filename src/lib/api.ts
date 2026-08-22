@@ -58,7 +58,10 @@ export type StudySearchResult = {
   excerpt: string;
 };
 
-async function request<T>(path: string, options: RequestInit = {}) {
+async function request<T>(
+  path: string,
+  options: RequestInit = {},
+) {
   const response = await fetch(path, {
     credentials: "include",
     headers: {
@@ -171,7 +174,9 @@ export const uploadMaterial = async (
     },
   );
 
-  const payload = (await response.json().catch(() => ({}))) as {
+  const payload = (await response
+    .json()
+    .catch(() => ({}))) as {
     error?: string;
     material?: StudyMaterial;
   };
@@ -200,10 +205,13 @@ export const getMaterialText = (materialId: number) =>
   }>(`/api/materials/${materialId}/text`);
 
 export const deleteMaterial = async (materialId: number) => {
-  const response = await fetch(`/api/materials/${materialId}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
+  const response = await fetch(
+    `/api/materials/${materialId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
 
   if (!response.ok) {
     throw new Error("Could not delete this material.");
@@ -216,6 +224,7 @@ export type Flashcard = {
   answer: string;
   explanation: string | null;
   moduleId: number;
+  isGenerated: boolean;
 };
 
 export type QuizQuestion = {
@@ -281,13 +290,12 @@ export const recordCardReview = (
   });
 
 export const startQuiz = (moduleId: number) =>
-  request<{
-    session: {
-      id: number;
-    };
-  }>(`/api/modules/${moduleId}/quiz-sessions`, {
-    method: "POST",
-  });
+  request<{ session: { id: number } }>(
+    `/api/modules/${moduleId}/quiz-sessions`,
+    {
+      method: "POST",
+    },
+  );
 
 export const answerQuiz = (
   sessionId: number,
@@ -395,10 +403,13 @@ export const exportModuleBackup = (moduleId: number) =>
   request<unknown>(`/api/modules/${moduleId}/backup`);
 
 export const restoreModuleBackup = (backup: unknown) =>
-  request<{ module: StudyModule }>("/api/modules/restore", {
-    method: "POST",
-    body: JSON.stringify(backup),
-  });
+  request<{ module: StudyModule }>(
+    "/api/modules/restore",
+    {
+      method: "POST",
+      body: JSON.stringify(backup),
+    },
+  );
 
 export const listNotes = (moduleId: number) =>
   request<{ notes: ModuleNote[] }>(
@@ -492,6 +503,56 @@ export const deleteTask = async (taskId: number) => {
 
   if (!response.ok) {
     throw new Error("Could not delete this task.");
+  }
+};
+
+export const createManualFlashcard = (
+  moduleId: number,
+  input: {
+    prompt: string;
+    answer: string;
+    explanation: string | null;
+  },
+) =>
+  request<{ flashcard: Flashcard }>(
+    `/api/modules/${moduleId}/flashcards`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+  );
+
+export const updateManualFlashcard = (
+  flashcardId: number,
+  input: {
+    prompt: string;
+    answer: string;
+    explanation: string | null;
+  },
+) =>
+  request<{ flashcard: Flashcard }>(
+    `/api/flashcards/${flashcardId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    },
+  );
+
+export const deleteManualFlashcard = async (
+  flashcardId: number,
+) => {
+  const response = await fetch(
+    `/api/flashcards/${flashcardId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Could not delete this manual flashcard.",
+    );
   }
 };
 

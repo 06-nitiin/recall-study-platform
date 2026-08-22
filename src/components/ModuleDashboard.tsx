@@ -16,14 +16,15 @@ import {
   type CurrentUser,
   type StudyModule,
 } from "../lib/api";
-import { FocusTimer } from "./FocusTimer";
 import { MaterialPanel } from "./MaterialPanel";
-import { ModuleBackupPanel } from "./ModuleBackupPanel";
-import { NotesPanel } from "./NotesPanel";
-import { ProgressPanel } from "./ProgressPanel";
-import { SearchPanel } from "./SearchPanel";
 import { StudyPanel } from "./StudyPanel";
+import { ProgressPanel } from "./ProgressPanel";
+import { ModuleBackupPanel } from "./ModuleBackupPanel";
+import { FocusTimer } from "./FocusTimer";
+import { NotesPanel } from "./NotesPanel";
 import { TasksPanel } from "./TasksPanel";
+import { SearchPanel } from "./SearchPanel";
+import { FlashcardAuthorPanel } from "./FlashcardAuthorPanel";
 
 export function ModuleDashboard({
   user,
@@ -51,7 +52,7 @@ export function ModuleDashboard({
       setError(
         reason instanceof Error
           ? reason.message
-          : "Could not load modules.",
+          : "Could not load modules."
       );
     } finally {
       setLoading(false);
@@ -77,12 +78,13 @@ export function ModuleDashboard({
         description: "",
       });
       setEditing(null);
+
       await refresh();
     } catch (reason) {
       setError(
         reason instanceof Error
           ? reason.message
-          : "Could not save module.",
+          : "Could not save module."
       );
     }
   };
@@ -122,8 +124,8 @@ export function ModuleDashboard({
           </h1>
 
           <p className="mt-3 max-w-xl leading-7 text-slate-600">
-            Create a module for each course or subject, then attach private
-            source notes.
+            Create a module for each course or subject, then attach
+            private source notes.
           </p>
         </div>
 
@@ -151,6 +153,7 @@ export function ModuleDashboard({
         >
           <div className="flex items-center gap-2 text-emerald-300">
             <BookPlus className="size-5" />
+
             <span className="text-sm font-semibold">
               {editing ? "Edit module" : "New module"}
             </span>
@@ -297,6 +300,7 @@ export function ModuleDashboard({
         <div className="mx-auto max-w-6xl">
           <MaterialPanel module={selectedModule} />
           <StudyPanel module={selectedModule} />
+          <FlashcardAuthorPanel module={selectedModule} />
           <NotesPanel module={selectedModule} />
           <TasksPanel module={selectedModule} />
           <FocusTimer module={selectedModule} />

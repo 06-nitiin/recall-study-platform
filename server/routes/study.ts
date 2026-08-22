@@ -7,7 +7,9 @@ import {
 import {
   addTutorMessage,
   createFocusSession,
+  createManualFlashcard,
   createQuizSession,
+  deleteManualFlashcardForUser,
   finishFocusSession,
   getGeneratedStudyContent,
   getModuleForUser,
@@ -17,7 +19,9 @@ import {
   recordQuizResponse,
   recordReview,
   replaceGeneratedStudyContent,
+  updateManualFlashcardForUser,
 } from "../db/queries";
+import { flashcardSchema } from "../lib/schemas";
 import { scheduleReview, type ReviewRating } from "../lib/sm2";
 import { requireUser } from "../middleware/requireUser";
 
@@ -46,9 +50,9 @@ studyRouter.post(
       );
 
       if (!module) {
-        return response.status(404).json({
-          error: "Module not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
       }
 
       const generated = await generateStudyContent(
@@ -63,9 +67,9 @@ studyRouter.post(
       });
     } catch (error) {
       if (error instanceof StudyAiError) {
-        return response.status(400).json({
-          error: error.message,
-        });
+        return response
+          .status(400)
+          .json({ error: error.message });
       }
 
       next(error);
@@ -83,9 +87,9 @@ studyRouter.get(
       );
 
       if (!module) {
-        return response.status(404).json({
-          error: "Module not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
       }
 
       response.json(await getGeneratedStudyContent(module.id));
@@ -105,14 +109,90 @@ studyRouter.get(
       );
 
       if (!module) {
-        return response.status(404).json({
-          error: "Module not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
       }
 
       response.json({
-        cards: await listDueFlashcards(request.user!.id, module.id),
+        cards: await listDueFlashcards(
+          request.user!.id,
+          module.id,
+        ),
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+studyRouter.post(
+  "/modules/:moduleId/flashcards",
+  async (request, response, next) => {
+    try {
+      const module = await ownedModule(
+        Number(request.params.moduleId),
+        request.user!.id,
+      );
+
+      if (!module) {
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
+      }
+
+      response.status(201).json({
+        flashcard: await createManualFlashcard(
+          module.id,
+          flashcardSchema.parse(request.body),
+        ),
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+studyRouter.patch(
+  "/flashcards/:flashcardId",
+  async (request, response, next) => {
+    try {
+      const flashcard =
+        await updateManualFlashcardForUser(
+          Number(request.params.flashcardId),
+          request.user!.id,
+          flashcardSchema.parse(request.body),
+        );
+
+      if (!flashcard) {
+        return response
+          .status(404)
+          .json({ error: "Manual flashcard not found." });
+      }
+
+      response.json({ flashcard });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+studyRouter.delete(
+  "/flashcards/:flashcardId",
+  async (request, response, next) => {
+    try {
+      const deleted = await deleteManualFlashcardForUser(
+        Number(request.params.flashcardId),
+        request.user!.id,
+      );
+
+      if (!deleted) {
+        return response
+          .status(404)
+          .json({ error: "Manual flashcard not found." });
+      }
+
+      response.status(204).end();
     } catch (error) {
       next(error);
     }
@@ -145,20 +225,30 @@ studyRouter.post(
         confidence < 1 ||
         confidence > 5
       ) {
-        return response.status(400).json({
-          error: "Use a valid rating and confidence from 1 to 5.",
-        });
+        return response
+          .status(400)
+          .json({
+            error:
+              "Use a valid rating and confidence from 1 to 5.",
+          });
       }
 
-      const module = await ownedModule(moduleId, request.user!.id);
+      const module = await ownedModule(
+        moduleId,
+        request.user!.id,
+      );
 
       if (!module) {
-        return response.status(404).json({
-          error: "Module not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
       }
 
-      const nextReview = scheduleReview(state, rating, confidence);
+      const nextReview = scheduleReview(
+        state,
+        rating,
+        confidence,
+      );
 
       await recordReview({
         userId: request.user!.id,
@@ -186,9 +276,9 @@ studyRouter.post(
       );
 
       if (!module) {
-        return response.status(404).json({
-          error: "Module not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
       }
 
       const session = await createQuizSession(
@@ -213,9 +303,9 @@ studyRouter.post(
       );
 
       if (!module) {
-        return response.status(404).json({
-          error: "Module not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
       }
 
       response.status(201).json({
@@ -240,9 +330,9 @@ studyRouter.post(
       );
 
       if (!finished) {
-        return response.status(404).json({
-          error: "Focus session not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Focus session not found." });
       }
 
       response.json(finished);
@@ -271,9 +361,11 @@ studyRouter.post(
         confidence < 1 ||
         confidence > 5
       ) {
-        return response.status(400).json({
-          error: "Confidence must be from 1 to 5.",
-        });
+        return response
+          .status(400)
+          .json({
+            error: "Confidence must be from 1 to 5.",
+          });
       }
 
       const result = await recordQuizResponse({
@@ -285,9 +377,9 @@ studyRouter.post(
       });
 
       if (!result) {
-        return response.status(404).json({
-          error: "Quiz question not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Quiz question not found." });
       }
 
       response.json(result);
@@ -307,9 +399,9 @@ studyRouter.get(
       );
 
       if (!module) {
-        return response.status(404).json({
-          error: "Module not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
       }
 
       response.json({
@@ -334,9 +426,9 @@ studyRouter.post(
       );
 
       if (!module) {
-        return response.status(404).json({
-          error: "Module not found.",
-        });
+        return response
+          .status(404)
+          .json({ error: "Module not found." });
       }
 
       const question = String(
@@ -345,7 +437,8 @@ studyRouter.post(
 
       if (!question || question.length > 3000) {
         return response.status(400).json({
-          error: "Enter a tutor question under 3,000 characters.",
+          error:
+            "Enter a tutor question under 3,000 characters.",
         });
       }
 
@@ -363,7 +456,9 @@ studyRouter.post(
 
       const answer = await answerTutorQuestion({
         question,
-        materials: await listReadyMaterialsForModule(module.id),
+        materials: await listReadyMaterialsForModule(
+          module.id,
+        ),
         history: history.map((message) => ({
           role: message.role,
           content: message.content,
@@ -381,9 +476,9 @@ studyRouter.post(
       response.json({ message });
     } catch (error) {
       if (error instanceof StudyAiError) {
-        return response.status(400).json({
-          error: error.message,
-        });
+        return response
+          .status(400)
+          .json({ error: error.message });
       }
 
       next(error);
