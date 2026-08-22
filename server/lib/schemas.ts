@@ -35,3 +35,6 @@ export const manualQuizQuestionSchema = z.object({
   correctOptionId: z.string().trim().min(1).max(80),
   explanation: z.string().trim().max(8_000).nullable().optional(),
 }).superRefine((question, context) => { if (!question.options.some((option) => option.id === question.correctOptionId)) context.addIssue({ code: "custom", message: "Choose one of the listed options as correct.", path: ["correctOptionId"] }); });
+
+export const profileSchema = z.object({ displayName: z.string().trim().min(2, "Enter at least two characters for your name.").max(80) });
+export const passwordChangeSchema = z.object({ currentPassword: z.string().min(1, "Enter your current password."), newPassword: z.string().min(8, "Use at least eight characters for your new password.").max(128) }).refine((value) => value.currentPassword !== value.newPassword, { message: "Choose a different new password.", path: ["newPassword"] });

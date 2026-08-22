@@ -60,7 +60,7 @@ export type StudySearchResult = {
 
 async function request<T>(
   path: string,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ) {
   const response = await fetch(path, {
     credentials: "include",
@@ -71,9 +71,9 @@ async function request<T>(
     ...options,
   });
 
-  const payload = (await response
-    .json()
-    .catch(() => ({}))) as { error?: string } & T;
+  const payload = (await response.json().catch(() => ({}))) as {
+    error?: string;
+  } & T;
 
   if (!response.ok) {
     throw new Error(payload.error ?? "Request failed.");
@@ -113,6 +113,23 @@ export const signOut = () =>
     credentials: "include",
   });
 
+export const updateProfile = (input: {
+  displayName: string;
+}) =>
+  request<{ user: CurrentUser }>("/api/auth/profile", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+
+export const changePassword = (input: {
+  currentPassword: string;
+  newPassword: string;
+}) =>
+  request<{ user: CurrentUser }>("/api/auth/password", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
 export const listModules = () =>
   request<{ modules: StudyModule[] }>("/api/modules");
 
@@ -130,15 +147,12 @@ export const updateModule = (
   input: {
     title: string;
     description: string;
-  },
+  }
 ) =>
-  request<{ module: StudyModule }>(
-    `/api/modules/${id}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    },
-  );
+  request<{ module: StudyModule }>(`/api/modules/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
 
 export const deleteModule = async (id: number) => {
   const response = await fetch(`/api/modules/${id}`, {
@@ -153,12 +167,12 @@ export const deleteModule = async (id: number) => {
 
 export const listMaterials = (moduleId: number) =>
   request<{ materials: StudyMaterial[] }>(
-    `/api/modules/${moduleId}/materials`,
+    `/api/modules/${moduleId}/materials`
   );
 
 export const uploadMaterial = async (
   moduleId: number,
-  file: File,
+  file: File
 ) => {
   const response = await fetch(
     `/api/modules/${moduleId}/materials/upload`,
@@ -174,7 +188,7 @@ export const uploadMaterial = async (
         "x-material-filename": encodeURIComponent(file.name),
       },
       body: file,
-    },
+    }
   );
 
   const payload = (await response
@@ -186,8 +200,7 @@ export const uploadMaterial = async (
 
   if (!response.ok) {
     throw new Error(
-      payload.error ??
-        "Could not upload this material.",
+      payload.error ?? "Could not upload this material."
     );
   }
 
@@ -208,21 +221,17 @@ export const getMaterialText = (materialId: number) =>
     extractedText: string;
   }>(`/api/materials/${materialId}/text`);
 
-export const deleteMaterial = async (
-  materialId: number,
-) => {
+export const deleteMaterial = async (materialId: number) => {
   const response = await fetch(
     `/api/materials/${materialId}`,
     {
       method: "DELETE",
       credentials: "include",
-    },
+    }
   );
 
   if (!response.ok) {
-    throw new Error(
-      "Could not delete this material.",
-    );
+    throw new Error("Could not delete this material.");
   }
 };
 
@@ -288,7 +297,7 @@ export const recordCardReview = (
       intervalDays: number;
       easeFactor: number;
     };
-  },
+  }
 ) =>
   request<{
     intervalDays: number;
@@ -299,12 +308,13 @@ export const recordCardReview = (
   });
 
 export const startQuiz = (moduleId: number) =>
-  request<{ session: { id: number } }>(
-    `/api/modules/${moduleId}/quiz-sessions`,
-    {
-      method: "POST",
-    },
-  );
+  request<{
+    session: {
+      id: number;
+    };
+  }>(`/api/modules/${moduleId}/quiz-sessions`, {
+    method: "POST",
+  });
 
 export const answerQuiz = (
   sessionId: number,
@@ -312,7 +322,7 @@ export const answerQuiz = (
     questionId: number;
     selectedOptionId: string;
     confidence: number;
-  },
+  }
 ) =>
   request<{
     isCorrect: boolean;
@@ -353,7 +363,7 @@ export const getTutorMessages = (moduleId: number) =>
 
 export const sendTutorMessage = (
   moduleId: number,
-  message: string,
+  message: string
 ) =>
   request<{
     message: {
@@ -409,22 +419,17 @@ export const savePreferences = (input: {
   });
 
 export const exportModuleBackup = (moduleId: number) =>
-  request<unknown>(
-    `/api/modules/${moduleId}/backup`,
-  );
+  request<unknown>(`/api/modules/${moduleId}/backup`);
 
 export const restoreModuleBackup = (backup: unknown) =>
-  request<{ module: StudyModule }>(
-    "/api/modules/restore",
-    {
-      method: "POST",
-      body: JSON.stringify(backup),
-    },
-  );
+  request<{ module: StudyModule }>("/api/modules/restore", {
+    method: "POST",
+    body: JSON.stringify(backup),
+  });
 
 export const listNotes = (moduleId: number) =>
   request<{ notes: ModuleNote[] }>(
-    `/api/modules/${moduleId}/notes`,
+    `/api/modules/${moduleId}/notes`
   );
 
 export const createNote = (
@@ -432,14 +437,14 @@ export const createNote = (
   input: {
     title: string;
     body: string;
-  },
+  }
 ) =>
   request<{ note: ModuleNote }>(
     `/api/modules/${moduleId}/notes`,
     {
       method: "POST",
       body: JSON.stringify(input),
-    },
+    }
   );
 
 export const updateNote = (
@@ -447,14 +452,14 @@ export const updateNote = (
   input: {
     title: string;
     body: string;
-  },
+  }
 ) =>
   request<{ note: ModuleNote }>(
     `/api/modules/notes/${noteId}`,
     {
       method: "PATCH",
       body: JSON.stringify(input),
-    },
+    }
   );
 
 export const deleteNote = async (noteId: number) => {
@@ -463,7 +468,7 @@ export const deleteNote = async (noteId: number) => {
     {
       method: "DELETE",
       credentials: "include",
-    },
+    }
   );
 
   if (!response.ok) {
@@ -473,7 +478,7 @@ export const deleteNote = async (noteId: number) => {
 
 export const listTasks = (moduleId: number) =>
   request<{ tasks: ModuleTask[] }>(
-    `/api/modules/${moduleId}/tasks`,
+    `/api/modules/${moduleId}/tasks`
   );
 
 export const createTask = (
@@ -481,26 +486,26 @@ export const createTask = (
   input: {
     title: string;
     dueDate: string | null;
-  },
+  }
 ) =>
   request<{ task: ModuleTask }>(
     `/api/modules/${moduleId}/tasks`,
     {
       method: "POST",
       body: JSON.stringify(input),
-    },
+    }
   );
 
 export const setTaskComplete = (
   taskId: number,
-  completed: boolean,
+  completed: boolean
 ) =>
   request<{ task: ModuleTask }>(
     `/api/modules/tasks/${taskId}/complete`,
     {
       method: "PATCH",
       body: JSON.stringify({ completed }),
-    },
+    }
   );
 
 export const deleteTask = async (taskId: number) => {
@@ -509,7 +514,7 @@ export const deleteTask = async (taskId: number) => {
     {
       method: "DELETE",
       credentials: "include",
-    },
+    }
   );
 
   if (!response.ok) {
@@ -523,14 +528,14 @@ export const createManualFlashcard = (
     prompt: string;
     answer: string;
     explanation: string | null;
-  },
+  }
 ) =>
   request<{ flashcard: Flashcard }>(
     `/api/modules/${moduleId}/flashcards`,
     {
       method: "POST",
       body: JSON.stringify(input),
-    },
+    }
   );
 
 export const updateManualFlashcard = (
@@ -539,30 +544,30 @@ export const updateManualFlashcard = (
     prompt: string;
     answer: string;
     explanation: string | null;
-  },
+  }
 ) =>
   request<{ flashcard: Flashcard }>(
     `/api/flashcards/${flashcardId}`,
     {
       method: "PATCH",
       body: JSON.stringify(input),
-    },
+    }
   );
 
 export const deleteManualFlashcard = async (
-  flashcardId: number,
+  flashcardId: number
 ) => {
   const response = await fetch(
     `/api/flashcards/${flashcardId}`,
     {
       method: "DELETE",
       credentials: "include",
-    },
+    }
   );
 
   if (!response.ok) {
     throw new Error(
-      "Could not delete this manual flashcard.",
+      "Could not delete this manual flashcard."
     );
   }
 };
@@ -577,14 +582,14 @@ export const createManualQuizQuestion = (
     }>;
     correctOptionId: string;
     explanation: string | null;
-  },
+  }
 ) =>
   request<{ question: QuizQuestion }>(
     `/api/modules/${moduleId}/quiz-questions`,
     {
       method: "POST",
       body: JSON.stringify(input),
-    },
+    }
   );
 
 export const updateManualQuizQuestion = (
@@ -597,35 +602,35 @@ export const updateManualQuizQuestion = (
     }>;
     correctOptionId: string;
     explanation: string | null;
-  },
+  }
 ) =>
   request<{ question: QuizQuestion }>(
     `/api/quiz-questions/${questionId}`,
     {
       method: "PATCH",
       body: JSON.stringify(input),
-    },
+    }
   );
 
 export const deleteManualQuizQuestion = async (
-  questionId: number,
+  questionId: number
 ) => {
   const response = await fetch(
     `/api/quiz-questions/${questionId}`,
     {
       method: "DELETE",
       credentials: "include",
-    },
+    }
   );
 
   if (!response.ok) {
     throw new Error(
-      "Could not delete this manual quiz question.",
+      "Could not delete this manual quiz question."
     );
   }
 };
 
 export const searchStudy = (query: string) =>
   request<{ results: StudySearchResult[] }>(
-    `/api/search?q=${encodeURIComponent(query)}`,
+    `/api/search?q=${encodeURIComponent(query)}`
   );
